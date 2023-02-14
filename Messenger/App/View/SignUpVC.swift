@@ -40,7 +40,7 @@ private extension SignUpVC {
         
         imageView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
         imageView.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -view.bounds.height / 4).isActive = true
-        imageView.heightAnchor.constraint(equalToConstant: 60).isActive = true
-        imageView.widthAnchor.constraint(equalToConstant: 60).isActive = true
+        imageView.heightAnchor.constraint(equalToConstant: view.bounds.height * 0.075).isActive = true
+        imageView.widthAnchor.constraint(equalToConstant: view.bounds.height * 0.075).isActive = true
     }
 }
