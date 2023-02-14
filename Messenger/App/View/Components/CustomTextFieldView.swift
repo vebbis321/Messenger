@@ -36,28 +36,38 @@ private extension CustomTextFieldView {
         layer.masksToBounds = true
         layer.cornerRadius = 3
 
-        // textField
-        textField.placeholder = placeHolder
+        // floatingLabel / placeholder
+        floatingLabel.text = placeHolder
+        floatingLabel.font = .systemFont(ofSize: 18, weight: .regular)
+        floatingLabel.textColor = .theme.placeholder
 
         addSubview(textField)
+        addSubview(floatingLabel)
     }
 }
 
 // MARK: - setUpConstraints
 private extension CustomTextFieldView {
     private func setUpConstraints() {
+        let padding: CGFloat = 15
 
         // self
         translatesAutoresizingMaskIntoConstraints = false
-        heightAnchor.constraint(equalToConstant: 60).isActive = true
         widthAnchor.constraint(equalTo: widthAnchor).isActive = true
 
         // textField
         textField.translatesAutoresizingMaskIntoConstraints = false
-        textField.topAnchor.constraint(equalTo: topAnchor, constant: 10).isActive = true
-        textField.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -10).isActive = true
-        textField.leftAnchor.constraint(equalTo: leftAnchor, constant: 10).isActive = true
-        textField.rightAnchor.constraint(equalTo: rightAnchor, constant: -10).isActive = true
+        textField.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
+        textField.leftAnchor.constraint(equalTo: leftAnchor, constant: padding).isActive = true
+        textField.rightAnchor.constraint(equalTo: rightAnchor, constant: padding).isActive = true
+
+        floatingLabel.translatesAutoresizingMaskIntoConstraints = false
+        floatingLabel.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
+        floatingLabel.leftAnchor.constraint(equalTo: leftAnchor, constant: padding).isActive = true
+        floatingLabel.rightAnchor.constraint(equalTo: rightAnchor, constant: padding).isActive = true
+
+        topAnchor.constraint(equalTo: textField.topAnchor, constant: -20).isActive = true
+        bottomAnchor.constraint(equalTo: textField.bottomAnchor, constant: 20).isActive = true
 
 
     }
@@ -76,8 +86,8 @@ final class TestVC: UIViewController {
         view.addSubview(textFieldView)
 
 
-        textFieldView.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 10).isActive = true
-        textFieldView.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -10).isActive = true
+        textFieldView.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 15).isActive = true
+        textFieldView.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -15).isActive = true
     }
 }
 
