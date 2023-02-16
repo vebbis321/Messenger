@@ -17,4 +17,5 @@ struct MessengerColorTheme {
     let button = UIColor(named: "Button")
     let buttonText = UIColor(named: "ButtonText")
     let placeholder = UIColor(named: "Placeholder")
+    let floatingLabel = UIColor(named: "FloatingLabel")
 }
