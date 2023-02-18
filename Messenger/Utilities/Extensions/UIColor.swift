@@ -12,7 +12,9 @@ extension UIColor {
 }
 
 struct MessengerColorTheme {
-    
+
+    let border = UIColor(named: "Border")
+    let activeBorder = UIColor(named: "ActiveBorder")
     let background = UIColor(named: "Background")
     let button = UIColor(named: "Button")
     let buttonText = UIColor(named: "ButtonText")

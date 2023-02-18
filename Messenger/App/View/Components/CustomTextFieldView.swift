@@ -13,7 +13,7 @@ class CustomTextFieldView: UIView {
 
     let textField = UITextField(frame: .zero)
     private let floatingLabel = UILabel(frame: .zero)
-
+    private let iconBtn = CustomIconBtn(icon: "xmark")
     private var placeHolder: String
     private var keyboard: UIKeyboardType
 
@@ -21,10 +21,11 @@ class CustomTextFieldView: UIView {
         self.placeHolder = placeholder
         self.keyboard = keyboard
         super.init(frame: frame)
-
+    
         setUpViews()
         setUpConstraints()
         setUpBindings()
+        setUpActions()
     }
 
 
@@ -34,34 +35,51 @@ class CustomTextFieldView: UIView {
 
 
     func handleTextFieldBecameActive() {
-        layer.borderColor = UIColor.black.cgColor
 
-        floatingLabel.transform = .init(scaleX: 0.3, y: 0.3)
-        floatingLabel.transform = .init(translationX: 0, y: -textField.intrinsicContentSize.height / 2)
+        layer.borderColor = UIColor.theme.activeBorder?.cgColor
+        floatingLabel.transform = .init(translationX: 0, y: -(textField.intrinsicContentSize.height * 0.45))
         floatingLabel.textColor = .theme.floatingLabel
         floatingLabel.font = .systemFont(ofSize: 12, weight: .regular)
+
         textField.transform = .init(translationX: 0, y: 7.5)
-        layoutIfNeeded()
+
+        if !(textField.text?.isEmpty ?? true) {
+            iconBtn.isHidden = false
+        }
+
+
     }
 
     func handleTextFieldBecameInactive() {
-        layer.borderColor = UIColor.lightGray.withAlphaComponent(0.6).cgColor
+
+        layer.borderColor = UIColor.theme.border?.cgColor
+        iconBtn.isHidden = true
+
         if textField.text?.isEmpty ?? true {
-            floatingLabel.transform = .init(scaleX: 1, y: 1)
             floatingLabel.transform = .identity
             floatingLabel.textColor = .theme.placeholder
             floatingLabel.font = .systemFont(ofSize: 15, weight: .regular)
+
             textField.transform = .identity
         }
+
     }
 
     func handleTextFieldBecameNonEmpty() {
-
+        iconBtn.isHidden = false
     }
 
     func handleTextFieldBecameEmpty() {
+        iconBtn.isHidden = true
+    }
 
+    func setUpActions() {
+        iconBtn.action = { [weak self] in
+            self?.textField.text = ""
+            NotificationCenter.default.post(
+                name:UITextField.textDidChangeNotification, object: self?.textField)
 
+        }
     }
 }
 
@@ -95,12 +113,12 @@ private extension CustomTextFieldView {
         // self
         backgroundColor = .white
         layer.borderWidth = 1
-        layer.borderColor = UIColor.lightGray.withAlphaComponent(0.6).cgColor
+        layer.borderColor = UIColor.theme.border?.cgColor
         layer.masksToBounds = true
         layer.cornerRadius = 3
 
         // textField
-        textField.font = .systemFont(ofSize: 15, weight: .regular)
+        textField.font = .systemFont(ofSize: 15, weight: .light)
         textField.keyboardType = keyboard
 
         // floatingLabel / placeholder
@@ -108,8 +126,12 @@ private extension CustomTextFieldView {
         floatingLabel.font = .systemFont(ofSize: 15, weight: .regular)
         floatingLabel.textColor = .theme.placeholder
 
+        // iconBtn
+        iconBtn.isHidden = true
+
         addSubview(textField)
         addSubview(floatingLabel)
+        addSubview(iconBtn)
     }
 }
 
@@ -122,23 +144,25 @@ private extension CustomTextFieldView {
         translatesAutoresizingMaskIntoConstraints = false
         widthAnchor.constraint(equalTo: widthAnchor).isActive = true
 
+        // iconBtn
+        iconBtn.rightAnchor.constraint(equalTo: rightAnchor, constant: -padding).isActive = true
+        iconBtn.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
+
         // textField
         textField.translatesAutoresizingMaskIntoConstraints = false
         textField.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
         textField.leftAnchor.constraint(equalTo: leftAnchor, constant: padding).isActive = true
-        textField.rightAnchor.constraint(equalTo: rightAnchor, constant: padding).isActive = true
+        textField.rightAnchor.constraint(equalTo: iconBtn.leftAnchor, constant: -padding).isActive = true
 
+        // floatingLabel
         floatingLabel.translatesAutoresizingMaskIntoConstraints = false
         floatingLabel.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
         floatingLabel.leftAnchor.constraint(equalTo: leftAnchor, constant: padding).isActive = true
-        floatingLabel.rightAnchor.constraint(equalTo: rightAnchor, constant: padding).isActive = true
+        floatingLabel.rightAnchor.constraint(equalTo: rightAnchor, constant: -padding).isActive = true
 
+        // self
         topAnchor.constraint(equalTo: textField.topAnchor, constant: -20).isActive = true
         bottomAnchor.constraint(equalTo: textField.bottomAnchor, constant: 20).isActive = true
-
-        print("textfield \(textField.intrinsicContentSize.height)")
-        print("floatingLabel \(floatingLabel.intrinsicContentSize.height)")
-        print("self \(intrinsicContentSize.height)")
 
     }
 }
@@ -166,6 +190,6 @@ struct TestVCPreview: PreviewProvider {
         UIViewControllerPreview {
             TestVC()
         }
-        .previewDevice("iPhone 14 Pro")
+        .previewDevice("iPhone 12 mini")
     }
 }

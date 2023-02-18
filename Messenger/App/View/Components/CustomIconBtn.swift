@@ -31,7 +31,7 @@ private extension CustomIconBtn {
     private func setUpLayout() {
         // layout
 
-        let config = UIImage.SymbolConfiguration(weight: .medium)
+        let config = UIImage.SymbolConfiguration(weight: .light)
         let iconImage = UIImage(systemName: icon, withConfiguration: config)?.withTintColor(.black, renderingMode: .alwaysOriginal)
         setImage(iconImage, for: .normal)
         addTarget(self, action: #selector(btnTapped), for: .touchUpInside)
