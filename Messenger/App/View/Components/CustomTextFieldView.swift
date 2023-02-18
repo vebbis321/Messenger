@@ -12,14 +12,16 @@ class CustomTextFieldView: UIView {
     private var subscriptions = Set<AnyCancellable>()
 
     let textField = UITextField(frame: .zero)
-    private let floatingLabel = UILabel(frame: .zero)
-    private let iconBtn = CustomIconBtn(icon: "xmark")
+    let iconBtn: CustomIconBtn
+    let floatingLabel = UILabel(frame: .zero)
+
     private var placeHolder: String
     private var keyboard: UIKeyboardType
 
-    required init(frame: CGRect = .zero, placeholder: String, keyboard: UIKeyboardType = .default) {
+    required init(frame: CGRect = .zero, placeholder: String, rightBtnIcon: String = "xmark", keyboard: UIKeyboardType = .default) {
         self.placeHolder = placeholder
         self.keyboard = keyboard
+        self.iconBtn = .init(icon: rightBtnIcon)
         super.init(frame: frame)
     
         setUpViews()
@@ -46,8 +48,6 @@ class CustomTextFieldView: UIView {
         if !(textField.text?.isEmpty ?? true) {
             iconBtn.isHidden = false
         }
-
-
     }
 
     func handleTextFieldBecameInactive() {
@@ -100,11 +100,6 @@ private extension CustomTextFieldView {
                 isTextEmpty ? self?.handleTextFieldBecameEmpty() : self?.handleTextFieldBecameNonEmpty()
             }.store(in: &subscriptions)
     }
-}
-
-// MARK: - actions
-extension CustomTextFieldView {
-
 }
 
 // MARK: - setUpViews

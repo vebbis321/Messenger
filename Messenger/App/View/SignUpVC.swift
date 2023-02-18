@@ -33,6 +33,7 @@ private extension SignUpVC {
         
         view.addSubview(imageView)
         view.addSubview(emailNumberTextField)
+        view.addSubview(passwordTextField)
     }
 }
 
@@ -49,6 +50,10 @@ private extension SignUpVC {
         emailNumberTextField.centerYAnchor.constraint(equalTo: imageView.topAnchor, constant: view.frame.height * 0.25).isActive = true
         emailNumberTextField.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 15).isActive = true
         emailNumberTextField.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -15).isActive = true
+
+        passwordTextField.topAnchor.constraint(equalTo: emailNumberTextField.bottomAnchor, constant: 10).isActive = true
+        passwordTextField.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 15).isActive = true
+        passwordTextField.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -15).isActive = true
     }
 
 }

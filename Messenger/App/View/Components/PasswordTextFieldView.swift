@@ -9,31 +9,37 @@ import UIKit
 
 final class PasswordTextFieldView: CustomTextFieldView {
 
-    required init(frame: CGRect = .zero, placeholder: String, keyboard: UIKeyboardType = .default) {
-        super.init(placeholder: placeholder, keyboard: keyboard)
-
+    required init(frame: CGRect = .zero, placeholder: String, rightBtnIcon: String = "eye.slash", keyboard: UIKeyboardType = .default) {
+        super.init(placeholder: placeholder, rightBtnIcon: rightBtnIcon, keyboard: keyboard)
         textField.isSecureTextEntry = true
     }
+
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
-    override func handleTextFieldBecameInactive() {
-        print("INACTIVE")
-
-    }
-        
     override func handleTextFieldBecameActive() {
-        print("Active")
+        layer.borderColor = UIColor.theme.activeBorder?.cgColor
+        iconBtn.isHidden = false
+
+        floatingLabel.transform = .init(translationX: 0, y: -(textField.intrinsicContentSize.height * 0.45))
+        floatingLabel.textColor = .theme.floatingLabel
+        floatingLabel.font = .systemFont(ofSize: 12, weight: .regular)
+
+        textField.transform = .init(translationX: 0, y: 7.5)
     }
 
     override func handleTextFieldBecameEmpty() {
-        print("EMprty")
+
     }
 
     override func handleTextFieldBecameNonEmpty() {
-        print("Not empty")
+
+    }
+
+    override func setUpActions() {
+        textField.togglePasswordVisibility()
     }
 
 
