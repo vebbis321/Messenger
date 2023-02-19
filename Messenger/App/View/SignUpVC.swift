@@ -10,8 +10,8 @@ import UIKit
 final class SignUpVC: UIViewController {
     
     let imageView = UIImageView(frame: .zero)
-    let emailNumberTextField = CustomTextFieldView(placeholder: "Mobile number or email address")
-    let passwordTextField = PasswordTextFieldView(placeholder: "Password")
+    let emailNumberTextField = AuthTextFieldView(placeholder: "Mobile number or email address")
+    let passwordTextField = AuthPasswordTextFieldView(placeholder: "Password")
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -43,11 +43,11 @@ private extension SignUpVC {
         imageView.translatesAutoresizingMaskIntoConstraints = false
         
         imageView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        imageView.centerYAnchor.constraint(equalTo: view.topAnchor, constant: view.bounds.height * 0.25).isActive = true
+        imageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: view.bounds.height * 0.125).isActive = true
         imageView.heightAnchor.constraint(equalToConstant: view.bounds.height * 0.075).isActive = true
         imageView.widthAnchor.constraint(equalToConstant: view.bounds.height * 0.075).isActive = true
 
-        emailNumberTextField.centerYAnchor.constraint(equalTo: imageView.topAnchor, constant: view.frame.height * 0.25).isActive = true
+        emailNumberTextField.topAnchor.constraint(equalTo: imageView.bottomAnchor, constant: view.frame.height * 0.125).isActive = true
         emailNumberTextField.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 15).isActive = true
         emailNumberTextField.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -15).isActive = true
 

@@ -8,8 +8,7 @@
 import UIKit
 import Combine
 
-class CustomTextFieldView: UIView {
-    private var subscriptions = Set<AnyCancellable>()
+class CustomAuthTextFieldImpl: UIView {
 
     let textField = UITextField(frame: .zero)
     let iconBtn: CustomIconBtn
@@ -18,92 +17,25 @@ class CustomTextFieldView: UIView {
     private var placeHolder: String
     private var keyboard: UIKeyboardType
 
-    required init(frame: CGRect = .zero, placeholder: String, rightBtnIcon: String = "xmark", keyboard: UIKeyboardType = .default) {
+    init(frame: CGRect = .zero, placeholder: String, icon: String, keyboard: UIKeyboardType = .default) {
         self.placeHolder = placeholder
         self.keyboard = keyboard
-        self.iconBtn = .init(icon: rightBtnIcon)
+        self.iconBtn = .init(icon: icon)
         super.init(frame: frame)
     
         setUpViews()
         setUpConstraints()
-        setUpBindings()
-        setUpActions()
+      
     }
-
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
-
-    func handleTextFieldBecameActive() {
-
-        layer.borderColor = UIColor.theme.activeBorder?.cgColor
-        floatingLabel.transform = .init(translationX: 0, y: -(textField.intrinsicContentSize.height * 0.45))
-        floatingLabel.textColor = .theme.floatingLabel
-        floatingLabel.font = .systemFont(ofSize: 12, weight: .regular)
-
-        textField.transform = .init(translationX: 0, y: 7.5)
-
-        if !(textField.text?.isEmpty ?? true) {
-            iconBtn.isHidden = false
-        }
-    }
-
-    func handleTextFieldBecameInactive() {
-
-        layer.borderColor = UIColor.theme.border?.cgColor
-        iconBtn.isHidden = true
-
-        if textField.text?.isEmpty ?? true {
-            floatingLabel.transform = .identity
-            floatingLabel.textColor = .theme.placeholder
-            floatingLabel.font = .systemFont(ofSize: 15, weight: .regular)
-
-            textField.transform = .identity
-        }
-
-    }
-
-    func handleTextFieldBecameNonEmpty() {
-        iconBtn.isHidden = false
-    }
-
-    func handleTextFieldBecameEmpty() {
-        iconBtn.isHidden = true
-    }
-
-    func setUpActions() {
-        iconBtn.action = { [weak self] in
-            self?.textField.text = ""
-            NotificationCenter.default.post(
-                name:UITextField.textDidChangeNotification, object: self?.textField)
-
-        }
-    }
 }
 
-// MARK: - setUpBindings
-private extension CustomTextFieldView {
-    private func setUpBindings() {
-        Publishers.Merge(textField.textBecameActivePublisher(), textField.textBecameInActivePublisher())
-            .removeDuplicates()
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] isActive in
-                isActive ? self?.handleTextFieldBecameActive() : self?.handleTextFieldBecameInactive()
-            }.store(in: &subscriptions)
 
-        textField.textIsEmptyPublisher()
-            .removeDuplicates()
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] isTextEmpty in
-                isTextEmpty ? self?.handleTextFieldBecameEmpty() : self?.handleTextFieldBecameNonEmpty()
-            }.store(in: &subscriptions)
-    }
-}
-
-// MARK: - setUpViews
-private extension CustomTextFieldView {
+// MARK: -Views
+private extension CustomAuthTextFieldImpl {
     private func setUpViews() {
         // self
         backgroundColor = .white
@@ -113,12 +45,12 @@ private extension CustomTextFieldView {
         layer.cornerRadius = 3
 
         // textField
-        textField.font = .systemFont(ofSize: 15, weight: .light)
+        textField.font = .systemFont(ofSize: 17, weight: .regular)
         textField.keyboardType = keyboard
 
         // floatingLabel / placeholder
         floatingLabel.text = placeHolder
-        floatingLabel.font = .systemFont(ofSize: 15, weight: .regular)
+        floatingLabel.font = .systemFont(ofSize: 17, weight: .regular)
         floatingLabel.textColor = .theme.placeholder
 
         // iconBtn
@@ -130,8 +62,8 @@ private extension CustomTextFieldView {
     }
 }
 
-// MARK: - setUpConstraints
-private extension CustomTextFieldView {
+// MARK: - Constrains
+private extension CustomAuthTextFieldImpl {
     private func setUpConstraints() {
         let padding: CGFloat = 15
 
@@ -163,12 +95,11 @@ private extension CustomTextFieldView {
 }
 
 
-
 // MARK: - Preview
 import SwiftUI
 
 final class TestVC: UIViewController {
-    let textFieldView = CustomTextFieldView(placeholder: "Mobile number or email address")
+    let textFieldView = AuthTextFieldView(placeholder: "Mobile number or email address")
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .theme.background

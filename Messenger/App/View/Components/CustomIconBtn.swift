@@ -24,9 +24,20 @@ final class CustomIconBtn: UIButton {
         fatalError("init(coder:) has not been implemented")
     }
 
+    // MARK: - Increase tappable area
+    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+        return bounds.insetBy(dx: -15, dy: -15).contains(point)
+    }
+
+    func updateIcon(for newIcon: String) {
+        let config = UIImage.SymbolConfiguration(weight: .light)
+        let iconImage = UIImage(systemName: newIcon, withConfiguration: config)?.withTintColor(.black, renderingMode: .alwaysOriginal)
+        setImage(iconImage, for: .normal)
+    }
+
 }
 
-// MARK: - setUpLayout
+// MARK: - Layout
 private extension CustomIconBtn {
     private func setUpLayout() {
         // layout
