@@ -9,17 +9,28 @@ import UIKit
 
 final class SignUpVC: UIViewController {
     
-    let imageView = UIImageView(frame: .zero)
-    let emailNumberTextField = AuthTextFieldView(placeholder: "Mobile number or email address")
-    let passwordTextField = AuthPasswordTextFieldView(placeholder: "Password")
+    private let imageView = UIImageView(frame: .zero)
+    private let emailNumberTextField = AuthTextFieldView(placeholder: "Mobile number or email address")
+    private let passwordTextField = AuthPasswordTextFieldView(placeholder: "Password")
+    private let loginBtn = AuthButton(title: "Log In")
     
     override func viewDidLoad() {
         super.viewDidLoad()
         hideKeyboardWhenTappedAround()
         setUpViews()
         setUpConstraints()
+        setUpActions()
     }
     
+}
+
+// MARK: - Actions
+private extension SignUpVC {
+    private func setUpActions() {
+        loginBtn.action = {
+
+        }
+    }
 }
 
 // MARK: - Views
@@ -34,6 +45,7 @@ private extension SignUpVC {
         view.addSubview(imageView)
         view.addSubview(emailNumberTextField)
         view.addSubview(passwordTextField)
+        view.addSubview(loginBtn)
     }
 }
 
@@ -54,6 +66,10 @@ private extension SignUpVC {
         passwordTextField.topAnchor.constraint(equalTo: emailNumberTextField.bottomAnchor, constant: 10).isActive = true
         passwordTextField.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 15).isActive = true
         passwordTextField.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -15).isActive = true
+
+        loginBtn.topAnchor.constraint(equalTo: passwordTextField.bottomAnchor, constant: 10).isActive = true
+        loginBtn.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 15).isActive = true
+        loginBtn.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -15).isActive = true
     }
 
 }

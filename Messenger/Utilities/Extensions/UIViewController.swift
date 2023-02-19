@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Combine
 
 // MARK: - hide keyboard on tap
 extension UIViewController {
@@ -17,5 +18,15 @@ extension UIViewController {
 
     @objc func dismissKeyboard() {
         view.endEditing(true)
+    }
+}
+
+// MARK: - Publishers
+extension UIViewController {
+    func keyboardIsShownPublisher() -> AnyPublisher<Bool, Never> {
+        NotificationCenter.default
+            .publisher(for: UIViewController.keyboardWillShowNotification, object: self)
+            .map { _ in true }
+            .eraseToAnyPublisher()
     }
 }

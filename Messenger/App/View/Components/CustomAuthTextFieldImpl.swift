@@ -67,10 +67,6 @@ private extension CustomAuthTextFieldImpl {
     private func setUpConstraints() {
         let padding: CGFloat = 15
 
-        // self
-        translatesAutoresizingMaskIntoConstraints = false
-        widthAnchor.constraint(equalTo: widthAnchor).isActive = true
-
         // iconBtn
         iconBtn.rightAnchor.constraint(equalTo: rightAnchor, constant: -padding).isActive = true
         iconBtn.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
@@ -88,6 +84,7 @@ private extension CustomAuthTextFieldImpl {
         floatingLabel.rightAnchor.constraint(equalTo: rightAnchor, constant: -padding).isActive = true
 
         // self
+        translatesAutoresizingMaskIntoConstraints = false
         topAnchor.constraint(equalTo: textField.topAnchor, constant: -20).isActive = true
         bottomAnchor.constraint(equalTo: textField.bottomAnchor, constant: 20).isActive = true
 
