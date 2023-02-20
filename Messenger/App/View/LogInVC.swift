@@ -6,8 +6,14 @@
 //
 
 import UIKit
+import Combine
 
 final class LogInVC: UIViewController {
+
+    private let containerView = UIView(frame: .zero)
+
+    private var keyboardPublisher: AnyCancellable?
+    private var flowLayoutConstraint: NSLayoutConstraint!
 
     private let messengerLogo = UIImageView(frame: .zero)
 
@@ -26,6 +32,43 @@ final class LogInVC: UIViewController {
         setUpViews()
         setUpConstraints()
         setUpActions()
+
+
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+
+        if keyboardPublisher == nil {
+            keyboardPublisher = self.keyboardListener()
+                .sink(receiveValue: { [unowned self] keyboard in
+                    switch keyboard.state {
+                    case .willShow:
+                        manageKeyboardChange(value: keyboard.height)
+                    case .willHide:
+                        manageKeyboardChange(value: 0)
+                    }
+                })
+        }
+
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        keyboardPublisher?.cancel()
+    }
+
+    func manageKeyboardChange(value: CGFloat) {
+        if value != 0 {
+            flowLayoutConstraint.constant = ((value - (view.frame.height - vStack.frame.maxY)) - 20)
+        } else {
+            flowLayoutConstraint.constant = value
+        }
+
+        UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 1, options: .curveEaseOut, animations:  { [weak self] in
+            self?.view.layoutIfNeeded()
+        }, completion: nil)
+
     }
     
 }
@@ -67,20 +110,28 @@ private extension LogInVC {
         metaLogo.contentMode = .scaleAspectFit
         metaLogo.tintColor = .theme.metaLogo
 
-        view.addSubview(messengerLogo)
-        view.addSubview(vStack)
-        view.addSubview(secondaryButton)
-        view.addSubview(metaLogo)
+        // containerView
+        view.addSubview(containerView)
+        containerView.addSubview(messengerLogo)
+        containerView.addSubview(vStack)
+        containerView.addSubview(secondaryButton)
+        containerView.addSubview(metaLogo)
     }
 }
 
 // MARK: - Constraints
 private extension LogInVC {
     private func setUpConstraints() {
+        containerView.translatesAutoresizingMaskIntoConstraints = false
+        flowLayoutConstraint = containerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor)
+        flowLayoutConstraint.isActive = true
+        containerView.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
+        containerView.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
+        containerView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor).isActive = true
+
         messengerLogo.translatesAutoresizingMaskIntoConstraints = false
-        
         messengerLogo.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        messengerLogo.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: view.bounds.height * 0.115).isActive = true
+        messengerLogo.topAnchor.constraint(equalTo: containerView.topAnchor, constant: view.bounds.height * 0.115).isActive = true
         messengerLogo.heightAnchor.constraint(equalToConstant: view.bounds.height * 0.07).isActive = true
         messengerLogo.widthAnchor.constraint(equalToConstant: view.bounds.height * 0.07).isActive = true
 
@@ -94,7 +145,7 @@ private extension LogInVC {
         secondaryButton.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -15).isActive = true
 
         metaLogo.translatesAutoresizingMaskIntoConstraints = false
-        metaLogo.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -15).isActive = true
+        metaLogo.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -15).isActive = true
         metaLogo.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
         metaLogo.heightAnchor.constraint(equalToConstant: 12).isActive = true
     }
