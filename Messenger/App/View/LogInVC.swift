@@ -10,6 +10,8 @@ import Combine
 
 final class LogInVC: UIViewController {
 
+    weak var coordinator: AuthCoordinator?
+
     private let containerView = UIView(frame: .zero)
 
     private var keyboardPublisher: AnyCancellable?
@@ -34,13 +36,13 @@ final class LogInVC: UIViewController {
         setUpActions()
 
 
+
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-
         if keyboardPublisher == nil {
-            keyboardPublisher = self.keyboardListener()
+            keyboardPublisher = keyboardListener()
                 .sink(receiveValue: { [unowned self] keyboard in
                     switch keyboard.state {
                     case .willShow:
@@ -50,11 +52,11 @@ final class LogInVC: UIViewController {
                     }
                 })
         }
-
     }
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
+        keyboardPublisher = nil
         keyboardPublisher?.cancel()
     }
 
@@ -85,8 +87,7 @@ private extension LogInVC {
         }
 
         secondaryButton.action = { [weak self] in
-            let vc = JoinFacebookVC()
-            self?.navigationController?.pushViewController(vc, animated: true)
+            self?.coordinator?.goToCreateAccount()
         }
     }
 }

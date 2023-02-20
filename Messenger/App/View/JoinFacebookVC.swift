@@ -8,6 +8,9 @@
 import SwiftUI
 
 final class JoinFacebookVC: UIViewController {
+
+    weak var coordinator: AuthCoordinator?
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
