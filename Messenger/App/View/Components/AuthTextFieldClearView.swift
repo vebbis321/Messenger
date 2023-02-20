@@ -1,73 +1,79 @@
 //
-//  PasswordTextFieldView.swift
+//  CustomTextFieldView.swift
 //  Messenger
 //
-//  Created by Vebjørn Daniloff on 2/16/23.
+//  Created by Vebjørn Daniloff on 2/19/23.
 //
 
 import UIKit
 import Combine
 
-final class AuthPasswordTextFieldView: AuthTextFieldView {
+final class AuthTextFieldClearView: AuthTextFieldView {
 
     private var subscriptions = Set<AnyCancellable>()
 
-    init(frame: CGRect = .zero, placeholder: String, returnKey: UIReturnKeyType) {
-        super.init(placeholder: placeholder, icon: "eye.slash", returnKey: returnKey)
-        textField.isSecureTextEntry = true
-        textField.textContentType = .password
+    init(frame: CGRect = .zero, placeholder: String, keyboard: UIKeyboardType = .default, returnKey: UIReturnKeyType) {
+        super.init(placeholder: placeholder, icon: "xmark", keyboard: keyboard, returnKey: returnKey)
+
         setUpBindings()
-        setUpAction()
+        setUpActions()
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
 }
 
 // MARK: - Bindings / Actions
-private extension AuthPasswordTextFieldView {
-    private func setUpBindings() {
+private extension AuthTextFieldClearView {
+    func setUpBindings() {
         Publishers.Merge(textField.textBecameActivePublisher(), textField.textBecameInActivePublisher())
             .removeDuplicates()
             .receive(on: DispatchQueue.main)
             .sink { [weak self] isActive in
                 isActive ? self?.handleTextFieldBecameActive() : self?.handleTextFieldBecameInactive()
             }.store(in: &subscriptions)
+
+        textField.textIsEmptyPublisher()
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isTextEmpty in
+                isTextEmpty ? self?.handleTextFieldBecameEmpty() : self?.handleTextFieldBecameNonEmpty()
+            }.store(in: &subscriptions)
     }
 
-    private func setUpAction() {
+    func setUpActions() {
         iconBtn.action = { [weak self] in
-            guard let self = self else { return }
+            self?.textField.text = ""
+            NotificationCenter.default.post(
+                name:UITextField.textDidChangeNotification, object: self?.textField)
 
-            self.textField.togglePasswordVisibility()
-            let isSecure = self.textField.isSecureTextEntry
-            self.iconBtn.updateIcon(for: "eye\(isSecure ? ".slash" : "")")
         }
     }
 }
 
-// MARK: - Funtctions
-private extension AuthPasswordTextFieldView {
+// MARK: - Functions
+private extension AuthTextFieldClearView {
 
-    private func handleTextFieldBecameActive() {
+    func handleTextFieldBecameActive() {
         layer.borderColor = UIColor.theme.activeBorder?.cgColor
-        iconBtn.isHidden = false
         floatingLabel.transform = .init(translationX: 0, y: -(textField.intrinsicContentSize.height * 0.45))
         floatingLabel.textColor = .theme.floatingLabel
         floatingLabel.font = .systemFont(ofSize: 13, weight: .regular)
 
         textField.transform = .init(translationX: 0, y: 7.5)
 
+        if !(textField.text?.isEmpty ?? true) {
+            iconBtn.isHidden = false
+        }
     }
 
-    private func handleTextFieldBecameInactive() {
+    func handleTextFieldBecameInactive() {
 
         layer.borderColor = UIColor.theme.border?.cgColor
+        iconBtn.isHidden = true
 
         if textField.text?.isEmpty ?? true {
-            iconBtn.isHidden = true
             floatingLabel.transform = .identity
             floatingLabel.textColor = .theme.placeholder
             floatingLabel.font = .systemFont(ofSize: 17, weight: .regular)
@@ -76,4 +82,11 @@ private extension AuthPasswordTextFieldView {
         }
     }
 
+    func handleTextFieldBecameNonEmpty() {
+        iconBtn.isHidden = false
+    }
+
+    func handleTextFieldBecameEmpty() {
+        iconBtn.isHidden = true
+    }
 }

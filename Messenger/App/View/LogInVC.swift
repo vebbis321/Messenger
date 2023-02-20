@@ -18,8 +18,8 @@ final class LogInVC: UIViewController {
     private let messengerLogo = UIImageView(frame: .zero)
 
     private var vStack: UIStackView!
-    private let emailNumberTextField = AuthTextFieldView(placeholder: "Mobile number or email address")
-    private let passwordTextField = AuthPasswordTextFieldView(placeholder: "Password")
+    private let emailNumberTextField = AuthTextFieldClearView(placeholder: "Mobile number or email address", returnKey: .continue)
+    private let passwordTextField = AuthPasswordTextFieldView(placeholder: "Password", returnKey: .done)
     private let loginBtn = AuthButton(title: "Log In")
     private let forgotPasswordBtn = TextButton(buttonText: "Forgotten Password?")
 
@@ -84,8 +84,9 @@ private extension LogInVC {
 
         }
 
-        secondaryButton.action = {
-            
+        secondaryButton.action = { [weak self] in
+            let vc = JoinFacebookVC()
+            self?.navigationController?.pushViewController(vc, animated: true)
         }
     }
 }
@@ -98,6 +99,10 @@ private extension LogInVC {
 
         // messengerLogo
         messengerLogo.image = UIImage(named: "Icon")
+
+        // txtFields
+        emailNumberTextField.textField.delegate = self
+        passwordTextField.textField.delegate = self
 
         // vStack
         vStack = .init(arrangedSubviews: [emailNumberTextField, passwordTextField, loginBtn, forgotPasswordBtn])
@@ -151,5 +156,16 @@ private extension LogInVC {
     }
 }
 
-
+// MARK: - TextFieldDelegate
+extension LogInVC: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        if textField == emailNumberTextField.textField {
+            textField.resignFirstResponder()
+            passwordTextField.textField.becomeFirstResponder()
+        } else {
+            // login
+        }
+        return true
+    }
+}
 
