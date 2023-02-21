@@ -32,9 +32,11 @@ final class CustomAlertController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .black.withAlphaComponent(0.7)
+        view.backgroundColor = .black.withAlphaComponent(0.35)
 
         vStack.axis = .vertical
+        vStack.customize(backgroundColor: .white, cornerRadius: 8)
+        
 
         alertButtons.forEach { btn in
             let uiBtn = UIButton(type: .custom)
@@ -55,5 +57,9 @@ final class CustomAlertController: UIViewController {
         vStack.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
         vStack.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
         
+    }
+
+    deinit {
+        print("✅ Deinit CustomAlertController")
     }
 }

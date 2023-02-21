@@ -38,11 +38,11 @@ class DefaultCreateAccountVC: UIViewController {
         let alert = CustomAlertController(
             alertTitle: "",
             alertButtons: [
-                .init(font: .systemFont(ofSize: 12, weight: .semibold), title: "Hello", action: {
+                .init(font: .systemFont(ofSize: 17, weight: .semibold), title: "Log in", action: {
 
                 }),
-                .init(font: .systemFont(ofSize: 12, weight: .medium), title: "yes", action: {
-
+                .init(font: .systemFont(ofSize: 17, weight: .medium), title: "Continue creating account", action: { [weak self] in
+                    self?.dismiss(animated: true)
                 })
 
             ]
