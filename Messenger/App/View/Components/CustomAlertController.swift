@@ -31,18 +31,34 @@ final class CustomAlertController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        setUpViews()
+        setUpConstraints()
+    }
+
+    deinit {
+        print("✅ Deinit CustomAlertController")
+    }
+}
+
+private extension CustomAlertController {
+    private func setUpViews() {
+        // self
         view.backgroundColor = .black.withAlphaComponent(0.25)
 
+        // titleLabel
         titleLabel.textColor = .theme.tintColor
         titleLabel.textAlignment = .center
         titleLabel.font = .systemFont(ofSize: 17, weight: .bold)
 
+        // vStack
         vStack.axis = .vertical
         vStack.spacing = 10
         vStack.customize(backgroundColor: .tertiarySystemGroupedBackground, cornerRadius: 12)
         vStack.layoutMargins = UIEdgeInsets(top: 13, left: 0, bottom: 13, right: 0)
         vStack.isLayoutMarginsRelativeArrangement = true
         vStack.addArrangedSubview(titleLabel)
+
+        // alertBtns
         alertButtons.forEach { btn in
             let uiBtn = UIButton(type: .custom)
             uiBtn.titleLabel?.font = btn.font
@@ -58,17 +74,17 @@ final class CustomAlertController: UIViewController {
             vStack.addArrangedSubview(uiBtn)
         }
 
+        // seperators
         vStack.addHorizontalSeparators(color: .theme.sepearator ?? .gray)
 
         view.addSubview(vStack)
+    }
+}
 
+private extension CustomAlertController {
+    private func setUpConstraints() {
         vStack.translatesAutoresizingMaskIntoConstraints = false
         vStack.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
         vStack.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
-        
-    }
-
-    deinit {
-        print("✅ Deinit CustomAlertController")
     }
 }

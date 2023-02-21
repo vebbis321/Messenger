@@ -39,7 +39,7 @@ class DefaultCreateAccountVC: UIViewController {
             alertTitle: "Already have an acoount?",
             alertButtons: [
                 .init(font: .systemFont(ofSize: 17, weight: .bold), title: "Log in", action: { [weak self] in
-                    self?.dismiss(animated: true, completion: { [weak self] in 
+                    self?.dismiss(animated: true, completion: { [weak self] in
                         self?.coordinator?.rootViewController.popToRootViewController(animated: true)
                     })
 
@@ -47,14 +47,11 @@ class DefaultCreateAccountVC: UIViewController {
                 .init(font: .systemFont(ofSize: 17, weight: .regular), title: "Continue creating account", action: { [weak self] in
                     self?.dismiss(animated: true)
                 })
-
             ]
         )
         alert.modalPresentationStyle = .overCurrentContext
         alert.modalTransitionStyle = .crossDissolve
-        present(alert, animated: true, completion: {
-            print("completion block")
-        })
+        present(alert, animated: true, completion: nil)
 
     }
 }
@@ -66,6 +63,9 @@ private extension DefaultCreateAccountVC {
         // hide "back" from back button
         navigationController?.navigationBar.topItem?.backBarButtonItem = .init(title: "", style: .plain, target: nil, action: nil)
         view.backgroundColor = .theme.background
+
+        // contentView
+        scrollView.delaysContentTouches = true
 
         // titleLabel
         titleLabel.textColor = .theme.tintColor
