@@ -20,3 +20,23 @@ extension UIStackView {
             subView.clipsToBounds = true
         }
 }
+
+// MARK: - seperator
+extension UIStackView {
+    func addHorizontalSeparators(color : UIColor) {
+        var i = arrangedSubviews.count - 1
+        while i > 0 {
+            let separator = createSeparator(color: color)
+            insertArrangedSubview(separator, at: i)
+            separator.widthAnchor.constraint(equalTo: widthAnchor, multiplier: 1).isActive = true
+            i -= 1
+        }
+    }
+
+    private func createSeparator(color : UIColor) -> UIView {
+        let separator = UIView()
+        separator.heightAnchor.constraint(equalToConstant: 0.5).isActive = true
+        separator.backgroundColor = color
+        return separator
+    }
+}

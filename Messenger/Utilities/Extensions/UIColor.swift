@@ -12,7 +12,7 @@ extension UIColor {
 }
 
 struct MessengerColorTheme {
-
+    let sepearator = UIColor(named: "Seperator")
     let border = UIColor(named: "Border")
     let activeBorder = UIColor(named: "ActiveBorder")
     let background = UIColor(named: "Background")
@@ -23,4 +23,5 @@ struct MessengerColorTheme {
     let placeholder = UIColor(named: "Placeholder")
     let floatingLabel = UIColor(named: "FloatingLabel")
     let hyperlink = UIColor(named: "Hyperlink")
+    let alertText = UIColor(named: "AlertText")
 }

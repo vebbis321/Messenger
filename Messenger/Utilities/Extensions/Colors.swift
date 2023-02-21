@@ -12,7 +12,7 @@ extension Color {
 }
 
 struct MessengerColorTheme2 {
-
+    let seperator = Color("Seperator")
     let border = Color("Border")
     let activeBorder = Color("ActiveBorder")
     let background = Color("Background")
@@ -23,5 +23,6 @@ struct MessengerColorTheme2 {
     let placeholder = Color("Placeholder")
     let floatingLabel = Color("FloatingLabel")
     let hyperlink = Color("Hyperlink")
+    let alertText = Color("AlertText")
 }
 

@@ -36,12 +36,15 @@ class DefaultCreateAccountVC: UIViewController {
     @objc func alreadyHaveAnAccountTapped() {
 
         let alert = CustomAlertController(
-            alertTitle: "",
+            alertTitle: "Already have an acoount?",
             alertButtons: [
-                .init(font: .systemFont(ofSize: 17, weight: .semibold), title: "Log in", action: {
+                .init(font: .systemFont(ofSize: 17, weight: .bold), title: "Log in", action: { [weak self] in
+                    self?.dismiss(animated: true, completion: { [weak self] in 
+                        self?.coordinator?.rootViewController.popToRootViewController(animated: true)
+                    })
 
                 }),
-                .init(font: .systemFont(ofSize: 17, weight: .medium), title: "Continue creating account", action: { [weak self] in
+                .init(font: .systemFont(ofSize: 17, weight: .regular), title: "Continue creating account", action: { [weak self] in
                     self?.dismiss(animated: true)
                 })
 
