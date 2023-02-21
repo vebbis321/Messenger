@@ -18,7 +18,7 @@ final class CreateAccountCoordinator: Coordinator {
     }
 
     func start() {
-        let vc = JoinFacebookVC()
+        let vc = JoinFacebookVC(titleStr: "Join Facebook to use\nMessenger")
         vc.coordinator = self
         rootViewController.pushViewController(vc, animated: true)
     }

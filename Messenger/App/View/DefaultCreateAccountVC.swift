@@ -11,62 +11,105 @@ class DefaultCreateAccountVC: UIViewController {
 
     weak var coordinator: CreateAccountCoordinator?
 
+    let contentView = UIView(frame: .zero)
+    let scrollView = UIScrollView(frame: .zero)
+
+    private let titleLabel = UILabel(frame: .zero)
+    private let alreadyHaveAnAccountBtn = UIButton(type: .custom)
 
     init(titleStr: String) {
         self.titleLabel.text = titleStr
         super.init(nibName: nil, bundle: nil)
-
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
-    let titleLabel: UILabel = {
-        let label = UILabel(frame: .zero)
-        label.textColor = .theme.tintColor
-        label.font = .systemFont(ofSize: 25, weight: .bold)
-        return label
-    }()
-
-    let alreadyHaveAnAccountBtn: UIButton = {
-        let btn = UIButton(type: .custom)
-        btn.setTitle("Already have an account?", for: .normal)
-        btn.setTitleColor(.theme.hyperlink, for: .normal)
-        btn.titleLabel?.textAlignment = .center
-        btn.titleLabel?.font = .systemFont(ofSize: 13, weight: .semibold)
-        btn.contentEdgeInsets = UIEdgeInsets(top: 0, left: 0.01, bottom: 0.01, right: 0) // remove padding
-        return btn
-    }()
-
-    @objc func alreadyHaveAnAccountTapped() {
-        coordinator?.rootViewController.popToRootViewController(animated: true)
-    }
-
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        setUpViews()
+        setUpConstraints()
+    }
+
+    @objc func alreadyHaveAnAccountTapped() {
+
+        let alert = CustomAlertController(
+            alertTitle: "",
+            alertButtons: [
+                .init(font: .systemFont(ofSize: 12, weight: .semibold), title: "Hello", action: {
+
+                }),
+                .init(font: .systemFont(ofSize: 12, weight: .medium), title: "yes", action: {
+
+                })
+
+            ]
+        )
+        alert.modalPresentationStyle = .overCurrentContext
+        alert.modalTransitionStyle = .crossDissolve
+        present(alert, animated: true, completion: {
+            print("completion block")
+        })
+
+    }
+}
+
+// MARK: - setUpViews
+private extension DefaultCreateAccountVC {
+    private func setUpViews() {
+        // self
         // hide "back" from back button
         navigationController?.navigationBar.topItem?.backBarButtonItem = .init(title: "", style: .plain, target: nil, action: nil)
-
-        // background
         view.backgroundColor = .theme.background
 
+        // titleLabel
+        titleLabel.textColor = .theme.tintColor
+        titleLabel.font = .systemFont(ofSize: 25, weight: .bold)
+        titleLabel.numberOfLines = 0
+
+        // alreadyHaveAnAccountBtn
+        alreadyHaveAnAccountBtn.setTitle("Already have an account?", for: .normal)
+        alreadyHaveAnAccountBtn.setTitleColor(.theme.hyperlink, for: .normal)
+        alreadyHaveAnAccountBtn.titleLabel?.textAlignment = .center
+        alreadyHaveAnAccountBtn.titleLabel?.font = .systemFont(ofSize: 13, weight: .semibold)
+        alreadyHaveAnAccountBtn.contentEdgeInsets = UIEdgeInsets(top: 0, left: 0.01, bottom: 0.01, right: 0) // remove padding
         alreadyHaveAnAccountBtn.addTarget(self, action: #selector(alreadyHaveAnAccountTapped), for: .touchUpInside)
-        view.addSubview(titleLabel)
+
+        view.addSubview(scrollView)
         view.addSubview(alreadyHaveAnAccountBtn)
+        scrollView.addSubview(titleLabel)
+        scrollView.addSubview(contentView)
+    }
+}
 
-        // title
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 10).isActive = true
-        titleLabel.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 15).isActive = true
-        titleLabel.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -15).isActive = true
-
+// MARK: - Constraints
+private extension DefaultCreateAccountVC {
+    private func setUpConstraints() {
         // btn
         alreadyHaveAnAccountBtn.translatesAutoresizingMaskIntoConstraints = false
         alreadyHaveAnAccountBtn.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
         alreadyHaveAnAccountBtn.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -10).isActive = true
 
+        // scrollView
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
+        scrollView.widthAnchor.constraint(equalTo: view.widthAnchor).isActive = true
+        scrollView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
+        scrollView.bottomAnchor.constraint(equalTo: alreadyHaveAnAccountBtn.topAnchor, constant: -10).isActive = true
 
+        // title
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        titleLabel.topAnchor.constraint(equalTo: scrollView.safeAreaLayoutGuide.topAnchor, constant: 10).isActive = true
+        titleLabel.leftAnchor.constraint(equalTo: scrollView.leftAnchor, constant: 15).isActive = true
+        titleLabel.rightAnchor.constraint(equalTo: scrollView.rightAnchor, constant: -15).isActive = true
+
+        // contentView
+        contentView.translatesAutoresizingMaskIntoConstraints = false
+        contentView.centerXAnchor.constraint(equalTo: scrollView.centerXAnchor).isActive = true
+        contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor, constant: -30).isActive = true
+        contentView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 10).isActive = true
+        contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor).isActive = true
     }
 }

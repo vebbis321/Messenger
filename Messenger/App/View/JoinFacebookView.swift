@@ -10,11 +10,10 @@ import SwiftUI
 struct JoinFacebookView: View {
 
     var getStartedTapped: (()->())?
-    var vcPopped: (()->())
 
     var body: some View {
 
-        DefaultCreateAccountView(title: "Join Facebook to use\nMessenger", vcPopped: vcPopped) {
+        DefaultCreateAccountView {
             Image("CreateFacebookAccount")
                 .resizable()
                 .scaledToFit()
