@@ -10,7 +10,7 @@ import Combine
 
 final class LogInVC: UIViewController {
 
-    weak var coordinator: AuthCoordinator?
+    weak var coordinator: LogInCoordinator?
 
     private let containerView = UIView(frame: .zero)
 
@@ -87,7 +87,7 @@ private extension LogInVC {
         }
 
         secondaryButton.action = { [weak self] in
-            self?.coordinator?.goToCreateAccount()
+            self?.coordinator?.startCreateAccountCoordinator()
         }
     }
 }

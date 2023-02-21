@@ -18,7 +18,7 @@ final class ApplicationCoordinator: Coordinator {
     }
 
     func start() {
-        let child = AuthCoordinator()
+        let child = LogInCoordinator()
         child.parentCoordinator = self
         childCoordinators.removeAll()
         childCoordinators.append(child)

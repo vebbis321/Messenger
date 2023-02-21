@@ -29,7 +29,7 @@ class TextButton: UIButton {
 private extension TextButton {
     private func setUpLayout() {
         setTitle(buttonText, for: .normal)
-        setTitleColor(.theme.textButton, for: .normal)
+        setTitleColor(.theme.tintColor, for: .normal)
         titleLabel?.textAlignment = .center
         titleLabel?.font = .systemFont(ofSize: 15, weight: .semibold)
         addTarget(self, action: #selector(btnTapped), for: .touchUpInside)

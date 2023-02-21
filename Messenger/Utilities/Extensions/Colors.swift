@@ -19,8 +19,9 @@ struct MessengerColorTheme2 {
     let metaLogo = Color("MetaLogo")
     let button = Color("Button")
     let buttonText = Color("ButtonText")
-    let textButton = Color("TextButton")
+    let tintColor = Color("TintColor")
     let placeholder = Color("Placeholder")
     let floatingLabel = Color("FloatingLabel")
+    let hyperlink = Color("Hyperlink")
 }
 
