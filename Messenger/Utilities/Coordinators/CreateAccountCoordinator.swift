@@ -29,6 +29,12 @@ final class CreateAccountCoordinator: Coordinator {
         rootViewController.pushViewController(vc, animated: true)
     }
 
+    func goToAddBirthdayVC() {
+        let vc = AddBirthdayVC(titleStr: "What's your date of birth?")
+        vc.coordinator = self
+        rootViewController.pushViewController(vc, animated: true)
+    }
+
     deinit {
         print("✅ Deinit CreateAccountCoordinator")
     }

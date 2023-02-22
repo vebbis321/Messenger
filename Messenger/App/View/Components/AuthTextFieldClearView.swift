@@ -8,19 +8,37 @@
 import UIKit
 import Combine
 
-final class AuthTextFieldClearView: AuthTextFieldView {
+final class AuthTextFieldClearView: AuthTextFieldView<UITextField> {
 
     private var subscriptions = Set<AnyCancellable>()
 
-    init(frame: CGRect = .zero, placeholder: String, keyboard: UIKeyboardType = .default, returnKey: UIReturnKeyType) {
-        super.init(placeholder: placeholder, icon: "xmark", keyboard: keyboard, returnKey: returnKey)
+    private let clearBtn = CustomIconBtn(icon: "xmark")
 
+    override init(frame: CGRect = .zero, placeholder: String, keyboard: UIKeyboardType = .default, returnKey: UIReturnKeyType) {
+        super.init(placeholder: placeholder, keyboard: keyboard, returnKey: returnKey)
+
+        updateLayout()
         setUpBindings()
         setUpActions()
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+}
+
+// MARK: - updateLayout
+private extension AuthTextFieldClearView {
+    private func updateLayout() {
+        clearBtn.isHidden = true
+        addSubview(clearBtn)
+
+        clearBtn.translatesAutoresizingMaskIntoConstraints = false
+        clearBtn.rightAnchor.constraint(equalTo: rightAnchor, constant: -15).isActive = true
+        clearBtn.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
+
+        txtFieldRightAnchorConstraint.constant = -(15 + clearBtn.intrinsicContentSize.width)
+        layoutIfNeeded()
     }
 }
 
@@ -43,7 +61,7 @@ private extension AuthTextFieldClearView {
     }
 
     func setUpActions() {
-        iconBtn.action = { [weak self] in
+        clearBtn.action = { [weak self] in
             self?.textField.text = ""
             NotificationCenter.default.post(
                 name:UITextField.textDidChangeNotification, object: self?.textField)
@@ -64,14 +82,14 @@ private extension AuthTextFieldClearView {
         textField.transform = .init(translationX: 0, y: 7.5)
 
         if !(textField.text?.isEmpty ?? true) {
-            iconBtn.isHidden = false
+            clearBtn.isHidden = false
         }
     }
 
     func handleTextFieldBecameInactive() {
 
         layer.borderColor = UIColor.theme.border?.cgColor
-        iconBtn.isHidden = true
+        clearBtn.isHidden = true
 
         if textField.text?.isEmpty ?? true {
             floatingLabel.transform = .identity
@@ -83,10 +101,10 @@ private extension AuthTextFieldClearView {
     }
 
     func handleTextFieldBecameNonEmpty() {
-        iconBtn.isHidden = false
+        clearBtn.isHidden = false
     }
 
     func handleTextFieldBecameEmpty() {
-        iconBtn.isHidden = true
+        clearBtn.isHidden = true
     }
 }

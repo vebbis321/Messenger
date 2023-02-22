@@ -8,7 +8,7 @@
 import UIKit
 
 final class AddNameVC: DefaultCreateAccountVC {
-    let subLabel = UILabel(frame: .zero)
+    let subLabel = SubLabel(labelText: "Enter the name you use in real life.")
     let hStack = UIStackView(frame: .zero)
     let firstNameTextField = AuthTextFieldClearView(placeholder: "First name", keyboard: .default, returnKey: .continue)
     let surnameTextField = AuthTextFieldClearView(placeholder: "Surname", keyboard: .default, returnKey: .done)
@@ -17,7 +17,7 @@ final class AddNameVC: DefaultCreateAccountVC {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        hideKeyboardWhenTappedAround()
         setUpViews()
         setUpConstraints()
     }
@@ -25,9 +25,10 @@ final class AddNameVC: DefaultCreateAccountVC {
 
 private extension AddNameVC {
     private func setUpViews() {
-        // subLabel
-        subLabel.font = .preferredFont(forTextStyle: .subheadline)
-        subLabel.text = "Enter the name you use in real life."
+
+        // txtFields
+        firstNameTextField.textField.delegate = self
+        surnameTextField.textField.delegate = self
 
         // hStack
         hStack.axis = .horizontal
@@ -36,8 +37,8 @@ private extension AddNameVC {
         hStack.addArrangedSubview(firstNameTextField)
         hStack.addArrangedSubview(surnameTextField)
 
-        nextButton.action = {
-            print("Tapped")
+        nextButton.action = { [weak self] in
+            self?.coordinator?.goToAddBirthdayVC()
         }
 
         contentView.addSubview(subLabel)
@@ -62,5 +63,19 @@ private extension AddNameVC {
         nextButton.widthAnchor.constraint(equalTo: contentView.widthAnchor).isActive = true
         nextButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor).isActive = true
 
+    }
+}
+
+// MARK: - TextFieldDelegate
+extension AddNameVC: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        if textField == firstNameTextField.textField {
+            textField.resignFirstResponder()
+            surnameTextField.textField.becomeFirstResponder()
+        } else {
+            // nextBtn action
+
+        }
+        return true
     }
 }

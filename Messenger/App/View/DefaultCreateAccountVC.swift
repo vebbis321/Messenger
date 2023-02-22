@@ -105,13 +105,13 @@ private extension DefaultCreateAccountVC {
         // title
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.topAnchor.constraint(equalTo: scrollView.safeAreaLayoutGuide.topAnchor, constant: 10).isActive = true
-        titleLabel.leftAnchor.constraint(equalTo: scrollView.leftAnchor, constant: 15).isActive = true
-        titleLabel.rightAnchor.constraint(equalTo: scrollView.rightAnchor, constant: -15).isActive = true
+        titleLabel.leftAnchor.constraint(equalTo: scrollView.leftAnchor, constant: 20).isActive = true
+        titleLabel.rightAnchor.constraint(equalTo: scrollView.rightAnchor, constant: -20).isActive = true
 
         // contentView
         contentView.translatesAutoresizingMaskIntoConstraints = false
         contentView.centerXAnchor.constraint(equalTo: scrollView.centerXAnchor).isActive = true
-        contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor, constant: -30).isActive = true
+        contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor, constant: -40).isActive = true
         contentView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 10).isActive = true
         contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor).isActive = true
     }

@@ -8,21 +8,21 @@
 import UIKit
 import Combine
 
-class AuthTextFieldView: UIView {
+class AuthTextFieldView<MyCustomTextField: UITextField>: UIView {
 
-    let textField = UITextField(frame: .zero)
-    let iconBtn: CustomIconBtn
+    let textField = MyCustomTextField()
     let floatingLabel = UILabel(frame: .zero)
+    var txtFieldRightAnchorConstraint: NSLayoutConstraint!
 
     private var placeHolder: String
     private var keyboard: UIKeyboardType
     private var returnKey: UIReturnKeyType
 
-    init(frame: CGRect = .zero, placeholder: String, icon: String, keyboard: UIKeyboardType = .default, returnKey: UIReturnKeyType) {
+    init(frame: CGRect = .zero, placeholder: String, keyboard: UIKeyboardType = .default, returnKey: UIReturnKeyType) {
         self.placeHolder = placeholder
         self.keyboard = keyboard
         self.returnKey = returnKey
-        self.iconBtn = .init(icon: icon)
+        
         super.init(frame: frame)
     
         setUpViews()
@@ -56,12 +56,9 @@ private extension AuthTextFieldView {
         floatingLabel.font = .systemFont(ofSize: 17, weight: .regular)
         floatingLabel.textColor = .theme.placeholder
 
-        // iconBtn
-        iconBtn.isHidden = true
-
         addSubview(textField)
         addSubview(floatingLabel)
-        addSubview(iconBtn)
+
     }
 }
 
@@ -70,15 +67,12 @@ private extension AuthTextFieldView {
     private func setUpConstraints() {
         let padding: CGFloat = 15
 
-        // iconBtn
-        iconBtn.rightAnchor.constraint(equalTo: rightAnchor, constant: -padding).isActive = true
-        iconBtn.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
-
         // textField
         textField.translatesAutoresizingMaskIntoConstraints = false
         textField.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
         textField.leftAnchor.constraint(equalTo: leftAnchor, constant: padding).isActive = true
-        textField.rightAnchor.constraint(equalTo: iconBtn.leftAnchor, constant: -padding).isActive = true
+        txtFieldRightAnchorConstraint = textField.rightAnchor.constraint(equalTo: rightAnchor, constant: -padding)
+        txtFieldRightAnchorConstraint.isActive = true
 
         // floatingLabel
         floatingLabel.translatesAutoresizingMaskIntoConstraints = false

@@ -128,6 +128,8 @@ private extension LogInVC {
 // MARK: - Constraints
 private extension LogInVC {
     private func setUpConstraints() {
+        let padding: CGFloat = 20
+
         containerView.translatesAutoresizingMaskIntoConstraints = false
         flowLayoutConstraint = containerView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor)
         flowLayoutConstraint.isActive = true
@@ -143,12 +145,12 @@ private extension LogInVC {
 
         vStack.translatesAutoresizingMaskIntoConstraints = false
         vStack.topAnchor.constraint(equalTo: messengerLogo.bottomAnchor, constant: view.frame.height * 0.115).isActive = true
-        vStack.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 15).isActive = true
-        vStack.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -15).isActive = true
+        vStack.leftAnchor.constraint(equalTo: view.leftAnchor, constant: padding).isActive = true
+        vStack.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -padding).isActive = true
 
         secondaryButton.bottomAnchor.constraint(equalTo: metaLogo.topAnchor, constant: -15).isActive = true
-        secondaryButton.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 15).isActive = true
-        secondaryButton.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -15).isActive = true
+        secondaryButton.leftAnchor.constraint(equalTo: view.leftAnchor, constant: padding).isActive = true
+        secondaryButton.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -padding).isActive = true
 
         metaLogo.translatesAutoresizingMaskIntoConstraints = false
         metaLogo.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -15).isActive = true
