@@ -69,10 +69,10 @@ private extension AddBirthdayVC {
         tappableSubText.text = "Choose your date of birth. You can always make this private later. \(clickText)"
         tappableSubText.addTappableTexts([clickText: nil])
         tappableSubText.onTextTap = { [weak self] in
-            let vc = CustomSheetVC()
-            vc.modalTransitionStyle = .crossDissolve
-            vc.modalPresentationStyle = .automatic
-            self?.present(vc, animated: true)
+            let slideVC = HalfScreenVC()
+            slideVC.modalPresentationStyle = .pageSheet
+
+            self?.present(slideVC, animated: true, completion: nil)
             return false
         }
 
