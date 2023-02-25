@@ -7,13 +7,15 @@
 
 import UIKit
 
-class SubLinkTextView: UITextView, UITextViewDelegate {
+class TappableTextView: UITextView, UITextViewDelegate {
 
-    typealias Links = [String: String]
+    typealias URLString = String
+    typealias ShowURL = Bool
+    typealias TappableTexts = [String: URLString?]
+    typealias OnTextTap = () -> ShowURL
 
-    typealias OnLinkTap = (URL) -> Bool
 
-    var onLinkTap: OnLinkTap?
+    var onTextTap: OnTextTap?
 
     override init(frame: CGRect = .zero, textContainer: NSTextContainer?) {
         super.init(frame: frame, textContainer: textContainer)
@@ -22,29 +24,30 @@ class SubLinkTextView: UITextView, UITextViewDelegate {
         isScrollEnabled = false //to have own size and behave like a label
         delegate = self
         font = .preferredFont(forTextStyle: .subheadline)
+        backgroundColor = .theme.background
     }
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
     }
 
-    func addLinks(_ links: Links) {
+    func addTappableTexts(_ tappableTexts: TappableTexts) {
         guard attributedText.length > 0  else {
             return
         }
         let mText = NSMutableAttributedString(attributedString: attributedText)
 
-        for (linkText, urlString) in links {
-            if linkText.count > 0 {
-                let linkRange = mText.mutableString.range(of: linkText)
-                mText.addAttribute(.link, value: urlString, range: linkRange)
+        for (text, optionalUrl) in tappableTexts {
+            if text.count > 0 {
+                let linkRange = mText.mutableString.range(of: text)
+                mText.addAttribute(.link, value: optionalUrl ?? "", range: linkRange)
             }
         }
         attributedText = mText
     }
 
     func textView(_ textView: UITextView, shouldInteractWith URL: URL, in characterRange: NSRange) -> Bool {
-        return onLinkTap?(URL) ?? true
+        return onTextTap?() ?? true
     }
 
     // to disable text selection

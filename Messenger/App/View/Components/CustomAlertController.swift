@@ -65,10 +65,9 @@ private extension CustomAlertController {
             uiBtn.setTitle(btn.title, for: .normal)
             uiBtn.setTitleColor(.theme.alertText, for: .normal)
             uiBtn.contentEdgeInsets = UIEdgeInsets(top: 0, left: 35, bottom: 0.01, right: 35)
-            let action = UIAction { _ in
+            uiBtn.addAction(for: .touchUpInside) { action in
                 btn.action()
             }
-            uiBtn.addAction(action, for: .touchUpInside)
             uiBtn.translatesAutoresizingMaskIntoConstraints = false
 
             vStack.addArrangedSubview(uiBtn)

@@ -8,8 +8,7 @@
 import UIKit
 
 final class AddBirthdayVC: DefaultCreateAccountVC {
-
-    private let subLinkTextView = SubLinkTextView()
+    private let tappableSubText = TappableTextView()
     private let textFieldView = AuthDateTextFieldView()
     private let datePicker = UIDatePicker()
     private let nextBtn = AuthButton(title: "Next")
@@ -64,12 +63,17 @@ extension AddBirthdayVC: UITextFieldDelegate {
 // MARK: - setUpViews
 private extension AddBirthdayVC {
     private func setUpViews() {
-        let clickText =  "Why do I need to provide my date of birth?"
-        subLinkTextView.text = "Choose your date of birth. You can always make this private later. \(clickText)"
-        subLinkTextView.addLinks([clickText: ""])
-        subLinkTextView.onLinkTap = { _ in
-            print("tapped")
-            return true
+        tappableSubText.textContainerInset = .zero
+        tappableSubText.textContainer.lineFragmentPadding = 0.0
+        let clickText = "Why do I need to provide my date of birth?"
+        tappableSubText.text = "Choose your date of birth. You can always make this private later. \(clickText)"
+        tappableSubText.addTappableTexts([clickText: nil])
+        tappableSubText.onTextTap = { [weak self] in
+            let vc = CustomSheetVC()
+            vc.modalTransitionStyle = .crossDissolve
+            vc.modalPresentationStyle = .automatic
+            self?.present(vc, animated: true)
+            return false
         }
 
         datePicker.preferredDatePickerStyle = .wheels
@@ -81,7 +85,7 @@ private extension AddBirthdayVC {
         textFieldView.textField.inputView = datePicker
         textFieldView.textField.delegate = self
 
-        view.addSubview(subLinkTextView)
+        view.addSubview(tappableSubText)
         view.addSubview(textFieldView)
         view.addSubview(nextBtn)
 
@@ -91,12 +95,12 @@ private extension AddBirthdayVC {
 // MARK: - setUpConstraints
 private extension AddBirthdayVC {
     private func setUpConstraints() {
-        subLinkTextView.translatesAutoresizingMaskIntoConstraints = false
-        subLinkTextView.topAnchor.constraint(equalTo: contentView.topAnchor).isActive = true
-        subLinkTextView.leftAnchor.constraint(equalTo: contentView.leftAnchor).isActive = true
-        subLinkTextView.rightAnchor.constraint(equalTo: contentView.rightAnchor).isActive = true
+        tappableSubText.translatesAutoresizingMaskIntoConstraints = false
+        tappableSubText.topAnchor.constraint(equalTo: contentView.topAnchor).isActive = true
+        tappableSubText.leftAnchor.constraint(equalTo: contentView.leftAnchor).isActive = true
+        tappableSubText.rightAnchor.constraint(equalTo: contentView.rightAnchor).isActive = true
 
-        textFieldView.topAnchor.constraint(equalTo: subLinkTextView.bottomAnchor, constant: 20).isActive = true
+        textFieldView.topAnchor.constraint(equalTo: tappableSubText.bottomAnchor, constant: 20).isActive = true
         textFieldView.pinSides(to: contentView)
 
         nextBtn.topAnchor.constraint(equalTo: textFieldView.bottomAnchor, constant: 15).isActive = true
