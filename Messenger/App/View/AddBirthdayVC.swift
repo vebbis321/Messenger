@@ -72,7 +72,7 @@ private extension AddBirthdayVC {
             let slideVC = HalfScreenVC()
             slideVC.modalPresentationStyle = .pageSheet
 
-            self?.present(slideVC, animated: true, completion: nil)
+            self?.present(slideVC, animated: true) 
             return false
         }
 
