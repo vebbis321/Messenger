@@ -32,3 +32,26 @@ extension UIView {
         rightAnchor.constraint(equalTo: superView.rightAnchor, constant: padding).isActive = true
     }
 }
+
+// MARK: - Animations
+extension UIView {
+    func defaultAnimation(_ action: @escaping ()->()) {
+        UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 1, initialSpringVelocity: 1, options: .curveEaseOut) {
+            action()
+        }
+    }
+
+    func spring(_ completionBlock: @escaping ()->()) {
+        guard transform.isIdentity else { return }
+        UIView.animate(withDuration: 0.1, delay: 0, options: .curveLinear) { [weak self] in
+            self?.transform = .init(scaleX: 0.95, y: 0.95)
+        } completion: { done in
+            UIView.animate(withDuration: 0.1, delay: 0, options: .curveLinear) { [weak self] in
+                self?.transform = .init(scaleX: 1, y: 1)
+            } completion: { _ in
+                completionBlock()
+            }
+        }
+
+    }
+}

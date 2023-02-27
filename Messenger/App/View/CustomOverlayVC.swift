@@ -18,6 +18,7 @@ class CustomOverlayVC<CustomContentView: UIView>: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setUpViews()
+        setUpConstraints()
     }
 
     override func viewDidLayoutSubviews() {

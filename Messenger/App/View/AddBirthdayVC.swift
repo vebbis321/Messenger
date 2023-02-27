@@ -60,28 +60,32 @@ extension AddBirthdayVC: UITextFieldDelegate {
        }
 }
 
+
 // MARK: - setUpViews
 private extension AddBirthdayVC {
     private func setUpViews() {
+
+        // tappableSubText
         tappableSubText.textContainerInset = .zero
         tappableSubText.textContainer.lineFragmentPadding = 0.0
         let clickText = "Why do I need to provide my date of birth?"
         tappableSubText.text = "Choose your date of birth. You can always make this private later. \(clickText)"
         tappableSubText.addTappableTexts([clickText: nil])
         tappableSubText.onTextTap = { [weak self] in
-            let slideVC = HalfScreenVC()
-            slideVC.modalPresentationStyle = .pageSheet
-
-            self?.present(slideVC, animated: true) 
+            let slideVC = CustomModalVC(customView: BirthdaysInfoView())
+            slideVC.modalPresentationStyle = .custom
+            self?.present(slideVC, animated: true)
             return false
         }
 
+        // datePicker
         datePicker.preferredDatePickerStyle = .wheels
         datePicker.timeZone = .autoupdatingCurrent
         datePicker.datePickerMode = .date
         datePicker.maximumDate = Date()
         datePicker.addTarget(self, action: #selector(handleDateChanged), for: .valueChanged)
 
+        // textFieldView
         textFieldView.textField.inputView = datePicker
         textFieldView.textField.delegate = self
 
