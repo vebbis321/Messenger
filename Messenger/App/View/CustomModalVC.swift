@@ -46,6 +46,8 @@ final class CustomModalVC: UIViewController {
             hasSetPointOrigin = true
             pointOrigin = customView.frame.origin
         }
+        presentingViewController?.view.roundCorners([.topLeft, .topRight], radius: 12)
+        customView.roundCorners([.topLeft, .topRight], radius: 8)
     }
 
     @objc func panGestureRecognizerAction(sender: UIPanGestureRecognizer) {
@@ -66,9 +68,8 @@ final class CustomModalVC: UIViewController {
             backdropView.alpha = 1 - percentage
 
             if let presentingViewController = presentingViewController {
-                let scale = 0.5 - (percentage / 0.05)
-                print(translation.y / 0.5)
-//                presentingViewController.view.transform = .init(scaleX: scale, y: scale)
+                let scale = (0.05 * percentage) + 0.95
+                presentingViewController.view.transform = .init(scaleX: scale, y: scale)
             }
 
             // handle fast swipe upe
@@ -77,6 +78,7 @@ final class CustomModalVC: UIViewController {
                 UIView.animate(withDuration: 0.45, delay: 0, options: [.curveEaseOut]) { [weak self] in
                     self?.customView.frame.origin = self?.pointOrigin ?? CGPoint(x: 0, y: 400)
                     self?.backdropView.alpha = 1
+                    self?.presentingViewController?.view.transform = .init(scaleX: 0.95, y: 0.95)
                 }
             }
         case .ended:
@@ -88,6 +90,7 @@ final class CustomModalVC: UIViewController {
                 UIView.animate(withDuration: 0.3) { [weak self] in
                     self?.customView.frame.origin = self?.pointOrigin ?? CGPoint(x: 0, y: 400)
                     self?.backdropView.alpha = 1
+                    self?.presentingViewController?.view.transform = .init(scaleX: 0.95, y: 0.95)
                 }
             }
 
@@ -107,6 +110,7 @@ private extension CustomModalVC {
     private func setUpLayout() {
 
         // self
+
         view.backgroundColor = .clear
         view.addSubview(backdropView)
         view.addSubview(customView)
