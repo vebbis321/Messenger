@@ -29,7 +29,7 @@ extension UIView {
 
     func pinSides(to superView: UIView, padding: CGFloat = 0) {
         leftAnchor.constraint(equalTo: superView.leftAnchor, constant: padding).isActive = true
-        rightAnchor.constraint(equalTo: superView.rightAnchor, constant: padding).isActive = true
+        rightAnchor.constraint(equalTo: superView.rightAnchor, constant: -padding).isActive = true
     }
 }
 

@@ -12,7 +12,7 @@ final class AuthPasswordTextFieldView: AuthTextFieldView<UITextField> {
 
     private var subscriptions = Set<AnyCancellable>()
 
-    private let showHidePasswordBtn = CustomIconBtn(icon: "eye.slash")
+    private let showHidePasswordBtn = CustomIconBtn(icon: "eye.slash", size: 20)
 
     init(frame: CGRect = .zero, placeholder: String, returnKey: UIReturnKeyType) {
         super.init(placeholder: placeholder, returnKey: returnKey)
@@ -41,7 +41,7 @@ private extension AuthPasswordTextFieldView {
         showHidePasswordBtn.rightAnchor.constraint(equalTo: rightAnchor, constant: -15).isActive = true
         showHidePasswordBtn.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
 
-        txtFieldRightAnchorConstraint.constant = -(15 + showHidePasswordBtn.intrinsicContentSize.width)
+        txtFieldRightAnchorConstraint.constant = -(30 + showHidePasswordBtn.intrinsicContentSize.width)
         layoutIfNeeded()
     }
 }

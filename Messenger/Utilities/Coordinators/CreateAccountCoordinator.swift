@@ -35,6 +35,18 @@ final class CreateAccountCoordinator: Coordinator {
         rootViewController.pushViewController(vc, animated: true)
     }
 
+    func goToAddEmailVC() {
+        let vc = AddEmailVC(titleStr: "What's your email address?")
+        vc.coordinator = self
+        rootViewController.pushViewController(vc, animated: true)
+    }
+
+    func goToAddPasswordVC() {
+        let vc = AddPasswordVC(titleStr: "Create a password")
+        vc.coordinator = self
+        rootViewController.pushViewController(vc, animated: true)
+    }
+
     deinit {
         print("✅ Deinit CreateAccountCoordinator")
     }

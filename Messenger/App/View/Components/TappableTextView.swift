@@ -17,14 +17,16 @@ class TappableTextView: UITextView, UITextViewDelegate {
 
     var onTextTap: OnTextTap?
 
-    override init(frame: CGRect = .zero, textContainer: NSTextContainer?) {
-        super.init(frame: frame, textContainer: textContainer)
+    init(frame: CGRect = .zero, customBackgroundColor: UIColor? = .theme.background) {
+        super.init(frame: frame, textContainer: nil)
         isEditable = false
         isSelectable = true
         isScrollEnabled = false //to have own size and behave like a label
         delegate = self
         font = .preferredFont(forTextStyle: .subheadline)
-        backgroundColor = .theme.background
+        backgroundColor = customBackgroundColor
+        textContainerInset = .zero
+        textContainer.lineFragmentPadding = 0.0
     }
 
     required init?(coder: NSCoder) {

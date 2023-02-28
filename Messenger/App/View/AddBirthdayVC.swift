@@ -8,6 +8,7 @@
 import UIKit
 
 final class AddBirthdayVC: DefaultCreateAccountVC {
+
     private let tappableSubText = TappableTextView()
     private let textFieldView = AuthDateTextFieldView()
     private let datePicker = UIDatePicker()
@@ -66,8 +67,7 @@ private extension AddBirthdayVC {
     private func setUpViews() {
 
         // tappableSubText
-        tappableSubText.textContainerInset = .zero
-        tappableSubText.textContainer.lineFragmentPadding = 0.0
+        
         let clickText = "Why do I need to provide my date of birth?"
         tappableSubText.text = "Choose your date of birth. You can always make this private later. \(clickText)"
         tappableSubText.addTappableTexts([clickText: nil])
@@ -88,6 +88,11 @@ private extension AddBirthdayVC {
         // textFieldView
         textFieldView.textField.inputView = datePicker
         textFieldView.textField.delegate = self
+
+        // nextBtn
+        nextBtn.action = { [weak self] in
+            self?.coordinator?.goToAddEmailVC()
+        }
 
         view.addSubview(tappableSubText)
         view.addSubview(textFieldView)

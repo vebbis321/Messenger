@@ -9,12 +9,20 @@ import UIKit
 
 final class CustomModalVC: UIViewController {
 
+    let presentingVcMinScale: CGFloat = 0.9
+
     private lazy var backdropView: UIView = {
-        let bdView = UIView(frame: self.view.bounds)
+        let bdView = UIView(frame: view.bounds)
         bdView.backgroundColor = UIColor.black.withAlphaComponent(0.5)
         return bdView
     }()
-
+    private lazy var modalContainerView: UIView = {
+        let view = UIView(frame: .zero)
+        view.backgroundColor = .secondarySystemBackground
+        return view
+    }()
+    private var handle = SheetHandlerView()
+    private var closeButton = CustomIconBtn(icon: "xmark", weight: .semibold, size: 18)
     private var customView: UIView
 
     private let customHeight = UIScreen.main.bounds.height * 0.75
@@ -44,31 +52,31 @@ final class CustomModalVC: UIViewController {
     override func viewDidLayoutSubviews() {
         if !hasSetPointOrigin {
             hasSetPointOrigin = true
-            pointOrigin = customView.frame.origin
+            pointOrigin = modalContainerView.frame.origin
         }
-        presentingViewController?.view.roundCorners([.topLeft, .topRight], radius: 12)
-        customView.roundCorners([.topLeft, .topRight], radius: 8)
+        presentingViewController?.view.roundCorners([.topLeft, .topRight], radius: 10)
+        modalContainerView.roundCorners([.topLeft, .topRight], radius: 5)
     }
 
     @objc func panGestureRecognizerAction(sender: UIPanGestureRecognizer) {
-        let translation = sender.translation(in: customView)
+        let translation = sender.translation(in: modalContainerView)
 
         // Not allowing the user to drag the view upward
         guard translation.y >= 0 else { return }
 
         // setting x as 0 because we don't want users to move the frame side ways!! Only want straight up or down
-        customView.frame.origin = CGPoint(x: 0, y: pointOrigin!.y + translation.y)
+        modalContainerView.frame.origin = CGPoint(x: 0, y: pointOrigin!.y + translation.y)
 
-        let draggedToDismiss = (translation.y > customView.frame.height / 2.0)
-        let dragVelocity = sender.velocity(in: customView)
+        let draggedToDismiss = (translation.y > modalContainerView.frame.height / 2.0)
+        let dragVelocity = sender.velocity(in: modalContainerView)
 
-        switch sender.state {
-        case .changed:
+
+        if sender.state == .changed {
             let percentage: CGFloat = translation.y / customHeight
             backdropView.alpha = 1 - percentage
 
             if let presentingViewController = presentingViewController {
-                let scale = (0.05 * percentage) + 0.95
+                let scale = ((1 - presentingVcMinScale) * percentage) + presentingVcMinScale
                 presentingViewController.view.transform = .init(scaleX: scale, y: scale)
             }
 
@@ -76,26 +84,25 @@ final class CustomModalVC: UIViewController {
             if dragVelocity.y < -3000 {
                 // Set back to original position of the view controller
                 UIView.animate(withDuration: 0.45, delay: 0, options: [.curveEaseOut]) { [weak self] in
-                    self?.customView.frame.origin = self?.pointOrigin ?? CGPoint(x: 0, y: 400)
-                    self?.backdropView.alpha = 1
-                    self?.presentingViewController?.view.transform = .init(scaleX: 0.95, y: 0.95)
+                    guard let self = self else { return }
+                    self.modalContainerView.frame.origin = self.pointOrigin ?? CGPoint(x: 0, y: 400)
+                    self.backdropView.alpha = 1
+                    self.presentingViewController?.view.transform = .init(scaleX: self.presentingVcMinScale, y: self.presentingVcMinScale)
                 }
             }
-        case .ended:
+        } else if sender.state == .ended {
             // is it as fast swipe or dragged to dismissed
             if (dragVelocity.y >= 1300) || draggedToDismiss {
                 dismiss(animated: true, completion: nil)
             } else {
                 // Set back to original position of the view controller
                 UIView.animate(withDuration: 0.3) { [weak self] in
-                    self?.customView.frame.origin = self?.pointOrigin ?? CGPoint(x: 0, y: 400)
-                    self?.backdropView.alpha = 1
-                    self?.presentingViewController?.view.transform = .init(scaleX: 0.95, y: 0.95)
+                    guard let self = self else { return }
+                    self.modalContainerView.frame.origin = self.pointOrigin ?? CGPoint(x: 0, y: 400)
+                    self.backdropView.alpha = 1
+                    self.presentingViewController?.view.transform = .init(scaleX: self.presentingVcMinScale, y: self.presentingVcMinScale)
                 }
             }
-
-        @unknown default:
-            break
         }
 
     }
@@ -110,23 +117,41 @@ private extension CustomModalVC {
     private func setUpLayout() {
 
         // self
-
         view.backgroundColor = .clear
         view.addSubview(backdropView)
-        view.addSubview(customView)
+        view.addSubview(modalContainerView)
+
+        // containerView
+        modalContainerView.addSubview(handle)
+        modalContainerView.addSubview(closeButton)
+        modalContainerView.addSubview(customView)
+
+        modalContainerView.translatesAutoresizingMaskIntoConstraints = false
+        modalContainerView.heightAnchor.constraint(equalToConstant: customHeight).isActive = true
+        modalContainerView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
+        modalContainerView.pinSides(to: view)
+
+        // handle
+        handle.topAnchor.constraint(equalTo: modalContainerView.topAnchor, constant: 8).isActive = true
+        handle.centerXAnchor.constraint(equalTo: modalContainerView.centerXAnchor).isActive = true
+
+        // closeButton
+        closeButton.action = { [weak self] in
+            self?.dismiss(animated: true)
+        }
+        closeButton.topAnchor.constraint(equalTo: handle.bottomAnchor, constant: 20).isActive = true
+        closeButton.leftAnchor.constraint(equalTo: modalContainerView.leftAnchor, constant: 20).isActive = true
 
         // customView
-        customView.translatesAutoresizingMaskIntoConstraints = false
-        customView.heightAnchor.constraint(equalToConstant: customHeight).isActive = true
-        customView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
-        customView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
-        customView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+        customView.topAnchor.constraint(equalTo: closeButton.bottomAnchor, constant: 20).isActive = true
+        customView.pinSides(to: modalContainerView, padding: 20)
+        customView.bottomAnchor.constraint(equalTo: modalContainerView.bottomAnchor, constant: -20).isActive = true
 
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
         backdropView.addGestureRecognizer(tapGesture)
 
         let panGesture = UIPanGestureRecognizer(target: self, action: #selector(panGestureRecognizerAction))
-        customView.addGestureRecognizer(panGesture)
+        modalContainerView.addGestureRecognizer(panGesture)
     }
 }
 
@@ -152,21 +177,21 @@ extension CustomModalVC: UIViewControllerTransitioningDelegate, UIViewController
         if isPresenting == true {
             containerView.addSubview(toVC.view)
 
-            customView.frame.origin.y += customHeight
+            modalContainerView.frame.origin.y += customHeight
             backdropView.alpha = 0
 
             UIView.animate(withDuration: 0.25, delay: 0, options: [.curveEaseOut], animations: { [weak self] in
                 guard let self = self else { return }
-                self.customView.frame.origin.y -= self.customHeight
+                self.modalContainerView.frame.origin.y -= self.customHeight
                 self.backdropView.alpha = 1
-                self.presentingViewController?.view.transform = .init(scaleX: 0.95, y: 0.95)
+                self.presentingViewController?.view.transform = .init(scaleX: self.presentingVcMinScale, y: self.presentingVcMinScale)
             }, completion: { (finished) in
                 transitionContext.completeTransition(true)
             })
         } else {
             UIView.animate(withDuration: 0.25, delay: 0, options: [.curveEaseOut], animations: { [weak self] in
                 guard let self = self else { return }
-                self.customView.frame.origin.y += self.customHeight
+                self.modalContainerView.frame.origin.y += self.customHeight
                 self.backdropView.alpha = 0
                 self.presentingViewController?.view.transform = .identity
             }, completion: { (finished) in

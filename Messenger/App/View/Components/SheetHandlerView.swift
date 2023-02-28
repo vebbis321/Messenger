@@ -15,6 +15,10 @@ final class SheetHandlerView: UIView {
         setUpLayout()
     }
 
+    override func layoutSubviews() {
+        roundCorners(.allCorners, radius: 10)
+    }
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -22,12 +26,11 @@ final class SheetHandlerView: UIView {
 
 private extension SheetHandlerView {
     private func setUpLayout() {
-        backgroundColor = .lightGray
-        layer.cornerRadius = 20
+        backgroundColor = .lightGray.withAlphaComponent(0.65)
         layer.masksToBounds = true
 
         translatesAutoresizingMaskIntoConstraints = false
-        widthAnchor.constraint(equalToConstant: 15).isActive = true
-        heightAnchor.constraint(equalToConstant: 5).isActive = true
+        widthAnchor.constraint(equalToConstant: 40).isActive = true
+        heightAnchor.constraint(equalToConstant: 4).isActive = true
     }
 }

@@ -11,7 +11,6 @@ import Combine
 final class AuthTextFieldClearView: AuthTextFieldView<UITextField> {
 
     private var subscriptions = Set<AnyCancellable>()
-
     private let clearBtn = CustomIconBtn(icon: "xmark")
 
     override init(frame: CGRect = .zero, placeholder: String, keyboard: UIKeyboardType = .default, returnKey: UIReturnKeyType) {
@@ -37,7 +36,7 @@ private extension AuthTextFieldClearView {
         clearBtn.rightAnchor.constraint(equalTo: rightAnchor, constant: -15).isActive = true
         clearBtn.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
 
-        txtFieldRightAnchorConstraint.constant = -(15 + clearBtn.intrinsicContentSize.width)
+        txtFieldRightAnchorConstraint.constant = -(30 + clearBtn.intrinsicContentSize.width)
         layoutIfNeeded()
     }
 }

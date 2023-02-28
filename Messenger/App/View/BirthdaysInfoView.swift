@@ -10,13 +10,13 @@ import UIKit
 final class BirthdaysInfoView: UIView {
 
 
-    private let xmarkBtn = CustomIconBtn(icon: "xmark")
     private let titleLabel = UILabel(frame: .zero)
-    private let linkTextView = TappableTextView()
+    private let linkTextView = TappableTextView(customBackgroundColor: .secondarySystemBackground)
 
     override init(frame: CGRect = .zero) {
         super.init(frame: frame)
         setUpViews()
+        setUpConstraints()
     }
 
     required init?(coder: NSCoder) {
@@ -28,7 +28,7 @@ final class BirthdaysInfoView: UIView {
 private extension BirthdaysInfoView {
     private func setUpViews() {
         // self
-        backgroundColor = .systemBackground
+        backgroundColor = .secondarySystemBackground
 
         // titleLabel
         titleLabel.text = "Birthdays"
@@ -41,7 +41,6 @@ private extension BirthdaysInfoView {
         linkTextView.text = "Providing your date of birth improves the features and ads that you see and helps to keep the Facebook community safe. You can find your date of birth in your personal infromation account settings. \(linkText)"
         linkTextView.addTappableTexts([linkText: "https://www.facebook.com/privacy/policy/"])
 
-        addSubview(xmarkBtn)
         addSubview(titleLabel)
         addSubview(linkTextView)
 
@@ -51,11 +50,9 @@ private extension BirthdaysInfoView {
 // MARK: - Constraints
 private extension BirthdaysInfoView {
     private func setUpConstraints() {
-        xmarkBtn.topAnchor.constraint(equalTo: topAnchor, constant: 10).isActive = true
-        xmarkBtn.leftAnchor.constraint(equalTo: leftAnchor).isActive = true
-
+        translatesAutoresizingMaskIntoConstraints = false
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.topAnchor.constraint(equalTo: xmarkBtn.bottomAnchor, constant: 20).isActive = true
+        titleLabel.topAnchor.constraint(equalTo: topAnchor).isActive = true
         titleLabel.leftAnchor.constraint(equalTo: leftAnchor).isActive = true
         titleLabel.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
 
