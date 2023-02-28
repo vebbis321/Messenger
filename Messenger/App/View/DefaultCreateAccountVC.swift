@@ -80,6 +80,7 @@ private extension DefaultCreateAccountVC {
         alreadyHaveAnAccountBtn.contentEdgeInsets = UIEdgeInsets(top: 0, left: 0.01, bottom: 0.01, right: 0) // remove padding
         alreadyHaveAnAccountBtn.addTarget(self, action: #selector(alreadyHaveAnAccountTapped), for: .touchUpInside)
 
+        
         view.addSubview(scrollView)
         view.addSubview(alreadyHaveAnAccountBtn)
         scrollView.addSubview(titleLabel)
@@ -105,8 +106,8 @@ private extension DefaultCreateAccountVC {
         // title
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.topAnchor.constraint(equalTo: scrollView.safeAreaLayoutGuide.topAnchor, constant: 10).isActive = true
-        titleLabel.leftAnchor.constraint(equalTo: scrollView.leftAnchor, constant: 20).isActive = true
-        titleLabel.rightAnchor.constraint(equalTo: scrollView.rightAnchor, constant: -20).isActive = true
+        titleLabel.widthAnchor.constraint(equalTo: scrollView.widthAnchor, constant: -40).isActive = true
+        titleLabel.centerXAnchor.constraint(equalTo: scrollView.centerXAnchor).isActive = true
 
         // contentView
         contentView.translatesAutoresizingMaskIntoConstraints = false

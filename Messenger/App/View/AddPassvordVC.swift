@@ -29,7 +29,7 @@ private extension AddPasswordVC {
         passwordTextField.textField.delegate = self
 
         nextButton.action = { [weak self] in
-//            self?.coordinator?.goToAddEmailVC()
+            self?.coordinator?.goToAgreeAndCreateAccountVC()
         }
 
         contentView.addSubview(subLabel)
