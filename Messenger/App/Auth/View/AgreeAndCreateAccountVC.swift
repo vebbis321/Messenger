@@ -16,6 +16,15 @@ final class AgreeAndCreateAccountVC: DefaultCreateAccountVC {
     let nextButton = AuthButton(title: "I Agree")
 
 
+
+    init(titleStr: String, password: String) {
+        super.init(titleStr: titleStr)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         hideKeyboardWhenTappedAround()

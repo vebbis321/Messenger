@@ -6,11 +6,15 @@
 //
 
 import UIKit
+import Combine
 
 final class ApplicationCoordinator: Coordinator {
     var rootViewController: UINavigationController = UINavigationController()
 
     var childCoordinators: [Coordinator] = [Coordinator]()
+
+    private let stateManager = StateManager()
+    private var stateSubscription: AnyCancellable?
 
     let window: UIWindow
     init(window: UIWindow) {
@@ -18,12 +22,32 @@ final class ApplicationCoordinator: Coordinator {
     }
 
     func start() {
-        let child = LogInCoordinator()
-        child.parentCoordinator = self
-        childCoordinators.removeAll()
-        childCoordinators.append(child)
-        child.start()
-        window.rootViewController = child.rootViewController
+        stateSubscription = stateManager.session
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] state in
+                switch state {
+                case .idle:
+                    let vc = LaunchVC()
+                    self?.window.rootViewController = vc
+
+                case .notAuth:
+                    let child = LogInCoordinator()
+                    child.parentCoordinator = self
+                    self?.childCoordinators.removeAll()
+                    self?.childCoordinators.append(child)
+                    child.start()
+                    self?.window.rootViewController = child.rootViewController
+
+                case .notVerified:
+                    break
+
+                case .verified:
+                    break
+
+                case .error:
+                    break
+                }
+            }
     }
 
     

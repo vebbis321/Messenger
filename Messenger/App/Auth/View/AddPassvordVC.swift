@@ -20,6 +20,11 @@ final class AddPasswordVC: DefaultCreateAccountVC {
         setUpViews()
         setUpConstraints()
     }
+
+    deinit {
+        coordinator?.password = nil
+        print("✅ Deinit AddPasswordVC")
+    }
 }
 
 private extension AddPasswordVC {

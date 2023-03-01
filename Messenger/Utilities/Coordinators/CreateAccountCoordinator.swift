@@ -13,6 +13,9 @@ final class CreateAccountCoordinator: Coordinator {
 
     var rootViewController: UINavigationController
 
+    var user = UserPrivate(id: nil, firstName: "", surName: "", email: "", dateOfBirth: 0)
+    var password: String? = nil
+
     init(rootViewController: UINavigationController) {
         self.rootViewController = rootViewController
     }
@@ -48,7 +51,8 @@ final class CreateAccountCoordinator: Coordinator {
     }
 
     func goToAgreeAndCreateAccountVC() {
-        let vc = AgreeAndCreateAccountVC(titleStr: "Agree to Facebook's terms and policies")
+        guard let password = password else { return }
+        let vc = AgreeAndCreateAccountVC(titleStr: "Agree to Facebook's terms and policies", password: password)
         vc.coordinator = self
         rootViewController.pushViewController(vc, animated: true)
     }

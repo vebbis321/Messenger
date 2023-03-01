@@ -8,6 +8,9 @@
 import UIKit
 
 final class AddNameVC: DefaultCreateAccountVC {
+
+    let viewModel = AddNameVM()
+
     let subLabel = SubLabel(labelText: "Enter the name you use in real life.")
     let hStack = UIStackView(frame: .zero)
     let firstNameTextField = AuthTextFieldClearView(placeholder: "First name", keyboard: .default, returnKey: .continue)
@@ -23,6 +26,7 @@ final class AddNameVC: DefaultCreateAccountVC {
     }
 }
 
+// MARK: - Views
 private extension AddNameVC {
     private func setUpViews() {
 
@@ -47,6 +51,7 @@ private extension AddNameVC {
     }
 }
 
+// MARK: - Constraints
 private extension AddNameVC {
     private func setUpConstraints() {
         subLabel.translatesAutoresizingMaskIntoConstraints = false
