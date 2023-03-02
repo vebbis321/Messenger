@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Combine
 
 final class AddNameVC: DefaultCreateAccountVC {
 
@@ -13,16 +14,46 @@ final class AddNameVC: DefaultCreateAccountVC {
 
     let subLabel = SubLabel(labelText: "Enter the name you use in real life.")
     let hStack = UIStackView(frame: .zero)
-    let firstNameTextField = AuthTextFieldClearView(placeholder: "First name", keyboard: .default, returnKey: .continue)
-    let surnameTextField = AuthTextFieldClearView(placeholder: "Surname", keyboard: .default, returnKey: .done)
+    let firstNameTextField = AuthTextFieldErrorView(placeholder: "First name", keyboard: .default, returnKey: .continue)
+    let surnameTextField = AuthTextFieldErrorView(placeholder: "Surname", keyboard: .default, returnKey: .done)
     let nextButton = AuthButton(title: "Next")
 
+    private var subscriptions = Set<AnyCancellable>()
+    private var nameSubscription: AnyCancellable?
 
     override func viewDidLoad() {
         super.viewDidLoad()
         hideKeyboardWhenTappedAround()
         setUpViews()
         setUpConstraints()
+        setUpBindings()
+    }
+}
+
+// MARK: - Bindings
+private extension AddNameVC {
+    private func setUpBindings() {
+        firstNameTextField.textField.createBinding(with: viewModel.firstName, storeIn: &subscriptions)
+        surnameTextField.textField.createBinding(with: viewModel.lastName, storeIn: &subscriptions)
+    }
+
+    private func startNameStateObserver() {
+        nameSubscription = viewModel
+            .nameStatus
+            .sink { [weak self] (firstNameStatus, surnameStatus) in
+                if firstNameStatus != .valid {
+                    self?.firstNameTextField.isError = true
+                } else {
+                    self?.firstNameTextField.isError = false
+                }
+
+                if surnameStatus != .valid {
+                    self?.surnameTextField.isError = true
+                } else {
+                    self?.surnameTextField.isError = false
+                }
+
+            }
     }
 }
 
@@ -41,8 +72,17 @@ private extension AddNameVC {
         hStack.addArrangedSubview(firstNameTextField)
         hStack.addArrangedSubview(surnameTextField)
 
+        // nextBtn
         nextButton.action = { [weak self] in
-            self?.coordinator?.goToAddBirthdayVC()
+            guard let self = self else { return }
+
+            if self.viewModel.nameStatus.value == (.valid, .valid) {
+                // if valid on first press move to next vc
+                self.coordinator?.goToAddBirthdayVC()
+            } else if self.nameSubscription == nil {
+                // ... else start the nameStateObserver
+                self.startNameStateObserver()
+            }
         }
 
         contentView.addSubview(subLabel)

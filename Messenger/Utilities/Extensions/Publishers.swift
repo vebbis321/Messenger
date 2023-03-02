@@ -8,12 +8,23 @@
 import Foundation
 import Combine
 
-extension Publishers {
-    func isSubjectEmpty<T: CurrentValueSubject<String, Never>>() {
-            T
-            .debounce(for: 0.2, scheduler: RunLoop.main)
-            .removeDuplicates()
-            .map { $0.isEmpty }
-            .eraseToAnyPublisher()
+
+extension Publisher where Output == String {
+    func isStringEmpty() -> Publishers.Map<Self, Bool> {
+        map { $0.isEmpty }
     }
+
+    func stringHasNumbers() -> Publishers.Map<Self, Bool> {
+        map { $0.hasNumbers() }
+    }
+
+    func stringHasSpecialChars() -> Publishers.Map<Self, Bool> {
+        map { $0.hasSpecialCharacters() }
+    }
+}
+
+
+extension Publisher {
+
+
 }

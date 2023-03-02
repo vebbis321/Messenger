@@ -63,7 +63,7 @@ private extension AuthPasswordTextFieldView {
 
             self.textField.togglePasswordVisibility()
             let isSecure = self.textField.isSecureTextEntry
-            self.showHidePasswordBtn.updateIcon(for: "eye\(isSecure ? ".slash" : "")")
+            self.showHidePasswordBtn.updateIcon(newIcon: "eye\(isSecure ? ".slash" : "")")
         }
     }
 }

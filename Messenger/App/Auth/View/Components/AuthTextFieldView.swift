@@ -10,7 +10,7 @@ import Combine
 
 class AuthTextFieldView<MyCustomTextField: UITextField>: UIView {
 
-    let textField = MyCustomTextField()
+    let textField: UITextField
     let floatingLabel = UILabel(frame: .zero)
     var txtFieldRightAnchorConstraint: NSLayoutConstraint!
 
@@ -22,6 +22,7 @@ class AuthTextFieldView<MyCustomTextField: UITextField>: UIView {
         self.placeHolder = placeholder
         self.keyboard = keyboard
         self.returnKey = returnKey
+        self.textField = MyCustomTextField()
         
         super.init(frame: frame)
     

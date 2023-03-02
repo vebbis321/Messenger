@@ -8,10 +8,10 @@
 import UIKit
 import Combine
 
-final class AuthTextFieldClearView: AuthTextFieldView<UITextField> {
+class AuthTextFieldClearView: AuthTextFieldView<UITextField> {
 
     private var subscriptions = Set<AnyCancellable>()
-    private let clearBtn = CustomIconBtn(icon: "xmark")
+    private let clearBtn = CustomIconBtn(icon: "xmark", size: 17)
 
     override init(frame: CGRect = .zero, placeholder: String, keyboard: UIKeyboardType = .default, returnKey: UIReturnKeyType) {
         super.init(placeholder: placeholder, keyboard: keyboard, returnKey: returnKey)
@@ -23,6 +23,32 @@ final class AuthTextFieldClearView: AuthTextFieldView<UITextField> {
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+
+    // MARK: - Bindings / Actions
+    func setUpBindings() {
+        Publishers.Merge(textField.textBecameActivePublisher(), textField.textBecameInActivePublisher())
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isActive in
+                isActive ? self?.handleTextFieldBecameActive() : self?.handleTextFieldBecameInactive()
+            }.store(in: &subscriptions)
+
+        textField.textIsEmptyPublisher()
+            .removeDuplicates()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isTextEmpty in
+                isTextEmpty ? self?.handleTextFieldBecameEmpty() : self?.handleTextFieldBecameNonEmpty()
+            }.store(in: &subscriptions)
+    }
+
+    private func setUpActions() {
+        clearBtn.action = { [weak self] in
+            self?.textField.text = ""
+            NotificationCenter.default.post(
+                name:UITextField.textDidChangeNotification, object: self?.textField)
+        }
     }
 }
 
@@ -41,37 +67,8 @@ private extension AuthTextFieldClearView {
     }
 }
 
-// MARK: - Bindings / Actions
-private extension AuthTextFieldClearView {
-    func setUpBindings() {
-        Publishers.Merge(textField.textBecameActivePublisher(), textField.textBecameInActivePublisher())
-            .removeDuplicates()
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] isActive in
-                isActive ? self?.handleTextFieldBecameActive() : self?.handleTextFieldBecameInactive()
-            }.store(in: &subscriptions)
-
-        textField.textIsEmptyPublisher()
-            .removeDuplicates()
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] isTextEmpty in
-                isTextEmpty ? self?.handleTextFieldBecameEmpty() : self?.handleTextFieldBecameNonEmpty()
-            }.store(in: &subscriptions)
-    }
-
-    func setUpActions() {
-        clearBtn.action = { [weak self] in
-            self?.textField.text = ""
-            NotificationCenter.default.post(
-                name:UITextField.textDidChangeNotification, object: self?.textField)
-
-        }
-    }
-}
-
-// MARK: - Functions
-private extension AuthTextFieldClearView {
-
+extension AuthTextFieldClearView {
+    // MARK: - Functions
     func handleTextFieldBecameActive() {
         layer.borderColor = UIColor.theme.activeBorder?.cgColor
         floatingLabel.transform = .init(translationX: 0, y: -(textField.intrinsicContentSize.height * 0.45))

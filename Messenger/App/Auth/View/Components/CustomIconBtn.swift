@@ -15,7 +15,10 @@ final class CustomIconBtn: UIButton {
     private var weight: UIImage.SymbolWeight
     private var size: CGFloat
 
-    required init(frame: CGRect = .zero, icon: String, weight: UIImage.SymbolWeight = .light, size: CGFloat = 17) {
+    private var height: NSLayoutConstraint!
+    private var width: NSLayoutConstraint!
+
+    required init(frame: CGRect = .zero, icon: String, weight: UIImage.SymbolWeight = .light, size: CGFloat = 20) {
         self.icon = icon
         self.weight = weight
         self.size = size
@@ -33,10 +36,18 @@ final class CustomIconBtn: UIButton {
         return bounds.insetBy(dx: -15, dy: -15).contains(point)
     }
 
-    func updateIcon(for newIcon: String) {
-        let config = UIImage.SymbolConfiguration(weight: weight)
-        let iconImage = UIImage(systemName: newIcon, withConfiguration: config)?.withTintColor(.theme.tintColor!, renderingMode: .alwaysOriginal)
+    func updateIcon(
+        newIcon: String,
+        newColor: UIColor = .theme.tintColor ?? .label,
+        newWeight: UIImage.SymbolWeight = .light,
+        newSize: CGFloat = 20
+    ) {
+        let config = UIImage.SymbolConfiguration(weight: newWeight)
+        let iconImage = UIImage(systemName: newIcon, withConfiguration: config)?.withTintColor(newColor, renderingMode: .alwaysOriginal)
         setImage(iconImage, for: .normal)
+
+        height.constant = newSize
+        layoutIfNeeded()
     }
 
 }
@@ -56,7 +67,9 @@ private extension CustomIconBtn {
 
         // constraints
         translatesAutoresizingMaskIntoConstraints = false
-        heightAnchor.constraint(equalToConstant: size).isActive = true
+        height = heightAnchor.constraint(equalToConstant: size)
+        height.isActive = true
+
     }
 }
 
