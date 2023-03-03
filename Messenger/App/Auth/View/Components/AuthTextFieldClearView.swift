@@ -11,7 +11,7 @@ import Combine
 class AuthTextFieldClearView: AuthTextFieldView<UITextField> {
 
     private var subscriptions = Set<AnyCancellable>()
-    private let clearBtn = CustomIconBtn(icon: "xmark", size: 17)
+    let clearBtn = CustomIconBtn(icon: "xmark", size: 17)
 
     override init(frame: CGRect = .zero, placeholder: String, keyboard: UIKeyboardType = .default, returnKey: UIReturnKeyType) {
         super.init(placeholder: placeholder, keyboard: keyboard, returnKey: returnKey)
@@ -104,3 +104,5 @@ extension AuthTextFieldClearView {
         clearBtn.isHidden = true
     }
 }
+
+

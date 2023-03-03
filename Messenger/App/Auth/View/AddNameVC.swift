@@ -40,6 +40,10 @@ private extension AddNameVC {
     private func startNameStateObserver() {
         nameSubscription = viewModel
             .nameStatus
+            .removeDuplicates(by: { prev, curr in
+                prev.0 == curr.0 || prev.1 == curr.1
+            })
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] (firstNameStatus, surnameStatus) in
                 if firstNameStatus != .valid {
                     self?.firstNameTextField.isError = true
@@ -52,7 +56,6 @@ private extension AddNameVC {
                 } else {
                     self?.surnameTextField.isError = false
                 }
-
             }
     }
 }
