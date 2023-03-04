@@ -37,7 +37,7 @@ class AuthTextFieldView<MyCustomTextField: UITextField>: UIView {
 }
 
 
-// MARK: -Views
+// MARK: - Views
 private extension AuthTextFieldView {
     private func setUpViews() {
         // self
