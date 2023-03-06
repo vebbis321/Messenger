@@ -8,6 +8,427 @@
 import UIKit
 import Combine
 
+
+class CustomAuthTextFieldView: UIView {
+
+
+    // MARK: - Components
+    private lazy var textField: UITextField = { [weak self] in
+        guard let self = self else { return UITextField() }
+        var txtField: UITextField!
+        // MARK: - FIX THIS HORRIBLE CODE
+        if self.viewModel.type == .Date {
+            txtField = DateTextField()
+        } else {
+            txtField = UITextField()
+        }
+        txtField.font = .systemFont(ofSize: 17, weight: .regular)
+        txtField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
+        txtField.delegate = self
+        return txtField
+    }()
+
+    private lazy var floatingLabel: UILabel = {
+        let label = UILabel(frame: .zero)
+        label.font = .systemFont(ofSize: 17, weight: .regular)
+        return label
+    }()
+
+    private lazy var rightViewButton: CustomIconBtn? = {
+        guard let btnConfig = viewModel.type.rightViewButton else { return nil }
+        let btn = CustomIconBtn(icon: btnConfig.icon, weight: .regular, size: btnConfig.size)
+        btn.isHidden = true
+        switch viewModel.type {
+        case .Default:
+            btn.action = clearBtnTapped
+        case .Password:
+            btn.action = toggleShowHidePasswordBtnTapped
+        case .Date:
+            break
+        }
+        return btn
+    }()
+
+
+    // MARK: - Actions
+    @objc private func handleTap() {
+        textField.becomeFirstResponder()
+    }
+
+    @objc private func textFieldDidChange(_ textField: UITextField) {
+        textState = textField.hasText ? .text : .isEmpty
+    }
+
+    private func clearBtnTapped() {
+        textField.text = ""
+        textState = .isEmpty
+    }
+
+    private func toggleShowHidePasswordBtnTapped() {
+        guard let rightViewButton = rightViewButton else { return }
+        textField.togglePasswordVisibility()
+        rightViewButton.updateIcon(
+            newIcon: textField.isSecureTextEntry ? "eye.slash" : "eye",
+            newColor: .theme.tintColor ?? .label,
+            newWeight: .regular,
+            newSize: 20
+        )
+
+    }
+
+    // MARK: - Properties
+    private var viewModel: ViewModel
+    private let padding: CGFloat = 15
+    private var txtFieldRightAnchorConstraint: NSLayoutConstraint!
+
+    // MARK: - Public TextField State
+    public var errorState: ErrorState? {
+        didSet {
+            evaluateErrorState()
+        }
+    }
+
+    // MARK: - Private TextField States
+    private var focusState: FocusState = .inactive {
+        didSet {
+            evaluateTextFocusState()
+            evaluateButtonState()
+        }
+    }
+
+    private var textState: TextState = .isEmpty {
+        didSet {
+            guard viewModel.type != .Date else { return }
+            evaluateTextState()
+            evaluateButtonState()
+        }
+    }
+
+
+    // MARK: - Private Methods
+    private func evaluateTextState() {
+        // so we don't set the properties of textField if its already set
+        guard textField.transform != textState.textFieldScale else { return }
+        floatingLabel.transform = textState == .isEmpty ? .identity : .init(translationX: 0, y: -(textField.intrinsicContentSize.height * 0.45))
+        floatingLabel.font = textState.floatingLabelFont
+        textField.transform = textState.textFieldScale
+
+        guard errorState != .error else { return }
+        floatingLabel.textColor = textState.floatingLabelColor
+    }
+
+    private func evaluateTextFocusState() {
+        guard errorState != .error else { return }
+        layer.borderColor = focusState.borderColor
+    }
+
+    private func evaluateErrorState() {
+        guard let state = errorState else {
+            return
+        }
+        floatingLabel.textColor = state.floatingLabelColor
+        layer.borderColor = state.borderColor
+    }
+
+    private func evaluateButtonState() {
+        guard let rightViewButton = rightViewButton else { return }
+        switch viewModel.type {
+        case .Default:
+            switch textState {
+            case .isEmpty:
+                // MARK: - Add Error state
+                rightViewButton.isHidden = true
+            case .text:
+                rightViewButton.isHidden = false
+            }
+        case .Password:
+            switch focusState {
+            case .active:
+                rightViewButton.isHidden = false
+            case .inactive:
+                rightViewButton.isHidden = true
+            }
+        case .Date: break
+        }
+    }
+
+    init(frame: CGRect = .zero, viewModel: ViewModel) {
+        self.viewModel = viewModel
+        super.init(frame: frame)
+        setup()
+
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+
+    // MARK: - setup
+    private func setup() {
+        // self
+        let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
+        addGestureRecognizer(tap)
+        backgroundColor = .white
+        layer.borderWidth = 1
+        layer.masksToBounds = true
+        layer.cornerRadius = 3
+        layer.borderColor = UIColor.theme.border?.cgColor
+
+        textField.keyboardType = viewModel.keyboard
+        textField.returnKeyType = viewModel.returnKey
+        textField.textContentType = viewModel.textContentType
+        floatingLabel.text = viewModel.placeholder
+
+        floatingLabel.textColor = viewModel.type.textColor
+        textField.textColor = viewModel.type.textColor
+        textField.isSecureTextEntry = viewModel.type.isSecure
+
+        addSubview(textField)
+        addSubview(floatingLabel)
+
+        // textField
+        textField.translatesAutoresizingMaskIntoConstraints = false
+        textField.leftAnchor.constraint(equalTo: leftAnchor, constant: padding).isActive = true
+        textField.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
+        txtFieldRightAnchorConstraint = textField.rightAnchor.constraint(equalTo: rightAnchor, constant: -padding)
+        txtFieldRightAnchorConstraint.isActive = true
+
+
+        // floatingLabel
+        floatingLabel.translatesAutoresizingMaskIntoConstraints = false
+        floatingLabel.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
+        floatingLabel.pinSides(to: self, padding: padding)
+
+        // self
+        translatesAutoresizingMaskIntoConstraints = false
+        topAnchor.constraint(equalTo: textField.topAnchor, constant: -20).isActive = true
+        bottomAnchor.constraint(equalTo: textField.bottomAnchor, constant: 20).isActive = true
+
+        // Add rightView if rightView is not nil
+        guard let rightViewButton = rightViewButton else { return }
+        addSubview(rightViewButton)
+
+        rightViewButton.rightAnchor.constraint(equalTo: rightAnchor, constant: -15).isActive = true
+        rightViewButton.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
+        txtFieldRightAnchorConstraint.constant = -(30 + rightViewButton.intrinsicContentSize.width)
+        layoutIfNeeded()
+
+    }
+}
+
+// MARK: - UITextFieldDelegate
+extension CustomAuthTextFieldView: UITextFieldDelegate {
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        // the color is red independent of the focus when the error state is triggered
+        if errorState != .error {
+            focusState = .active
+        }
+    }
+
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        if errorState != .error {
+            focusState = .inactive
+        }
+    }
+}
+
+extension CustomAuthTextFieldView {
+    // MARK: - ViewModel
+    struct ViewModel {
+        enum TextFieldType {
+            case Default
+            case Password
+            case Date
+
+            var isSecure: Bool {
+                self == .Password ? true : false
+            }
+
+            var floatingLabelColor: UIColor? {
+                switch self {
+                case .Date:
+                    return .theme.floatingLabel
+                default:
+                    return .theme.placeholder
+                }
+            }
+
+            var textColor: UIColor? {
+                switch self {
+                case .Date:
+                    return .clear
+                default:
+                    return .label
+                }
+            }
+
+            var rightViewButton: RightViewButton? {
+                switch self {
+                case .Default:
+                    return .init(icon: "xmark", size: 17)
+                case .Password:
+                    return .init(icon: "eye.slash", size: 20)
+                case .Date:
+                    return nil
+                }
+            }
+
+        }
+
+        struct RightViewButton {
+            let icon: String
+            let size: CGFloat
+        }
+
+        let placeholder: String
+        let keyboard: UIKeyboardType = .default
+        let returnKey: UIReturnKeyType
+        let textContentType: UITextContentType? = nil
+        let type: TextFieldType
+    }
+
+}
+
+// MARK: - Public States
+extension CustomAuthTextFieldView {
+    public enum ErrorState {
+        case normal
+        case error
+
+        var floatingLabelColor: UIColor? {
+            switch self {
+            case .normal:
+                return .theme.floatingLabel
+            case .error:
+                return .red
+            }
+        }
+
+        var borderColor: CGColor? {
+            switch self {
+            case .normal:
+                return UIColor.theme.border?.cgColor
+            case .error:
+                return UIColor.red.cgColor
+            }
+        }
+    }
+}
+
+// MARK: - Private States
+private extension CustomAuthTextFieldView {
+    private enum TextState {
+        case isEmpty
+        case text
+
+        var floatingLabelColor: UIColor? {
+            switch self {
+            case .isEmpty:
+                return .theme.floatingLabel
+            case .text:
+                return .theme.placeholder
+            }
+        }
+
+        var floatingLabelFont: UIFont {
+            switch self {
+            case .isEmpty:
+                return  .systemFont(ofSize: 17, weight: .regular)
+            case .text:
+                return .systemFont(ofSize: 13, weight: .regular)
+            }
+        }
+
+        var textFieldScale: CGAffineTransform {
+            switch self {
+            case .isEmpty:
+                return .identity
+            case .text:
+                return CGAffineTransform(translationX: 0, y: 7.5)
+            }
+        }
+
+    }
+
+    private enum FocusState {
+        case active
+        case inactive
+
+        var borderColor: CGColor? {
+            switch self {
+            case .active:
+                return UIColor.theme.activeBorder?.cgColor
+            case .inactive:
+                return UIColor.theme.border?.cgColor
+            }
+        }
+    }
+
+    private enum ButtonState {
+        case isHidden
+        case isShown
+    }
+
+}
+
+// MARK: - Test VC
+final class TextfieldVC: UIViewController {
+    let txtField = CustomAuthTextFieldView(
+        viewModel: .init(
+            placeholder: "Clear",
+            returnKey: .default, type: .Default))
+    let txtField2 = CustomAuthTextFieldView(
+        viewModel: .init(
+            placeholder: "Password",
+            returnKey: .default, type: .Password))
+    let txtField3 = CustomAuthTextFieldView(
+        viewModel: .init(
+            placeholder: "Date",
+            returnKey: .default, type: .Date))
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        hideKeyboardWhenTappedAround()
+        view.backgroundColor = .theme.background
+
+        view.addSubview(txtField)
+        view.addSubview(txtField2)
+        view.addSubview(txtField3)
+
+        txtField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
+        txtField.pinSides(to: view, padding: 20)
+
+        txtField2.topAnchor.constraint(equalTo: txtField.bottomAnchor, constant: 10).isActive = true
+        txtField2.pinSides(to: view, padding: 20)
+
+        txtField3.topAnchor.constraint(equalTo: txtField2.bottomAnchor, constant: 10).isActive = true
+        txtField3.pinSides(to: view, padding: 20)
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+
+        txtField.errorState = .error
+    }
+}
+
+
+
+
+import SwiftUI
+
+struct TxtFieldVCPreview: PreviewProvider {
+    static var previews: some View {
+        UIViewControllerPreview {
+            TextfieldVC()
+        }
+        .previewDevice("iPhone 12 mini")
+    }
+}
+
+
+
 extension UITextField {
     func applyCustomClearButton() {
         clearButtonMode = .never
@@ -65,226 +486,4 @@ extension UITextField {
         rightView = view
     }
 
-}
-
-class CustomAuthTextFieldView: UIView {
-
-    struct ViewModel {
-        enum TextFieldType {
-            case Default
-            case Password
-            case Date
-
-            var isSecure: Bool {
-                self == .Password ? true : false
-            }
-
-            var floatingLabelColor: UIColor? {
-                switch self {
-                case .Default:
-                    return .theme.placeholder
-                case .Password:
-                    return .theme.placeholder
-                case .Date:
-                    return .theme.floatingLabel
-                }
-            }
-
-            var textColor: UIColor? {
-                switch self {
-                case .Default:
-                    return .label
-                case .Password:
-                    return .label
-                case .Date:
-                    return .clear
-                }
-            }
-        }
-
-        enum State {
-            case normal
-            case error
-
-            var floatingLabelColor: UIColor? {
-                switch self {
-                case .normal:
-                    return .theme.floatingLabel
-                case .error:
-                    return .red
-                }
-            }
-
-            var borderColor: CGColor? {
-                switch self {
-                case .normal:
-                    return UIColor.theme.border?.cgColor
-                case .error:
-                    return UIColor.red.cgColor
-                }
-            }
-        }
-
-        /// The placeholder text.
-        let placeholder: String
-        let keyboard: UIKeyboardType = .default
-        let returnKey: UIReturnKeyType
-        let textContentType: UITextContentType? = nil
-        let type: TextFieldType
-    }
-
-    lazy var textField: UITextField = {
-        var txtField: UITextField!
-        if self.viewModel.type == .Date {
-            txtField = DateTextField()
-        } else {
-            txtField = UITextField()
-        }
-        txtField.font = .systemFont(ofSize: 17, weight: .regular)
-        return txtField
-    }()
-
-    private func setUpSelf() {
-        backgroundColor = .white
-        layer.borderWidth = 1
-        layer.masksToBounds = true
-        layer.cornerRadius = 3
-        layer.borderColor = UIColor.theme.border?.cgColor
-    }
-
-    private func customSetupConfigs() {
-        textField.keyboardType = viewModel.keyboard
-        textField.returnKeyType = viewModel.returnKey
-        textField.textContentType = viewModel.textContentType
-        floatingLabel.text = viewModel.placeholder
-
-        floatingLabel.textColor = viewModel.type.textColor
-        textField.textColor = viewModel.type.textColor
-        textField.isSecureTextEntry = viewModel.type.isSecure
-    }
-
-    private func addRightView() {
-        switch viewModel.type {
-        case .Default:
-            return textField.applyCustomClearButton()
-        case .Password:
-            return textField.applyShowHidePasswordBtn()
-        case .Date:
-            break
-        }
-    }
-
-    var state: ViewModel.State? {
-        didSet {
-            guard let state = state else {
-                return
-            }
-            floatingLabel.textColor = state.floatingLabelColor
-            layer.borderColor = state.borderColor
-        }
-    }
-
-    private var viewModel: ViewModel
-    private let floatingLabel = UILabel(frame: .zero)
-
-
-    init(frame: CGRect = .zero, viewModel: ViewModel) {
-
-        self.viewModel = viewModel
-
-        super.init(frame: frame)
-        setUpViews()
-        setUpConstraints()
-
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-}
-
-private extension CustomAuthTextFieldView {
-    private func setUpViews() {
-        setUpSelf()
-        customSetupConfigs()
-        addRightView()
-        addSubview(textField)
-        addSubview(floatingLabel)
-    }
-}
-
-
-// MARK: - Constrains
-private extension CustomAuthTextFieldView {
-    private func setUpConstraints() {
-        let padding: CGFloat = 15
-
-        // textField
-        textField.translatesAutoresizingMaskIntoConstraints = false
-        textField.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
-        textField.pinSides(to: self, padding: padding)
-
-        // floatingLabel
-        floatingLabel.translatesAutoresizingMaskIntoConstraints = false
-        floatingLabel.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
-        floatingLabel.pinSides(to: self, padding: padding)
-
-        // self
-        translatesAutoresizingMaskIntoConstraints = false
-        topAnchor.constraint(equalTo: textField.topAnchor, constant: -20).isActive = true
-        bottomAnchor.constraint(equalTo: textField.bottomAnchor, constant: 20).isActive = true
-
-    }
-}
-
-final class TextfieldVC: UIViewController {
-    let txtField = CustomAuthTextFieldView(
-        viewModel: .init(
-            placeholder: "Clear",
-            returnKey: .default, type: .Default))
-    let txtField2 = CustomAuthTextFieldView(
-        viewModel: .init(
-            placeholder: "Password",
-            returnKey: .default, type: .Password))
-    let txtField3 = CustomAuthTextFieldView(
-        viewModel: .init(
-            placeholder: "Date",
-            returnKey: .default, type: .Date))
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-
-        view.backgroundColor = .theme.background
-
-        view.addSubview(txtField)
-        view.addSubview(txtField2)
-        view.addSubview(txtField3)
-
-        txtField.topAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
-        txtField.pinSides(to: view, padding: 20)
-
-        txtField2.topAnchor.constraint(equalTo: txtField.bottomAnchor, constant: 10).isActive = true
-        txtField2.pinSides(to: view, padding: 20)
-
-        txtField3.topAnchor.constraint(equalTo: txtField2.bottomAnchor, constant: 10).isActive = true
-        txtField3.pinSides(to: view, padding: 20)
-    }
-
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-
-        txtField.state = .error
-    }
-}
-
-
-import SwiftUI
-
-struct TxtFieldVCPreview: PreviewProvider {
-    static var previews: some View {
-        UIViewControllerPreview {
-            TextfieldVC()
-        }
-        .previewDevice("iPhone 12 mini")
-    }
 }

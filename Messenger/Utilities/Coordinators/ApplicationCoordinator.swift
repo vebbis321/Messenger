@@ -22,32 +22,33 @@ final class ApplicationCoordinator: Coordinator {
     }
 
     func start() {
-        stateSubscription = stateManager.session
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] state in
-                switch state {
-                case .idle:
-                    let vc = LaunchVC()
-                    self?.window.rootViewController = vc
-
-                case .notAuth:
-                    let child = LogInCoordinator()
-                    child.parentCoordinator = self
-                    self?.childCoordinators.removeAll()
-                    self?.childCoordinators.append(child)
-                    child.start()
-                    self?.window.rootViewController = child.rootViewController
-
-                case .notVerified:
-                    break
-
-                case .verified:
-                    break
-
-                case .error:
-                    break
-                }
-            }
+        window.rootViewController = TextfieldVC()
+//        stateSubscription = stateManager.session
+//            .receive(on: DispatchQueue.main)
+//            .sink { [weak self] state in
+//                switch state {
+//                case .idle:
+//                    let vc = LaunchVC()
+//                    self?.window.rootViewController = vc
+//
+//                case .notAuth:
+//                    let child = LogInCoordinator()
+//                    child.parentCoordinator = self
+//                    self?.childCoordinators.removeAll()
+//                    self?.childCoordinators.append(child)
+//                    child.start()
+//                    self?.window.rootViewController = child.rootViewController
+//
+//                case .notVerified:
+//                    break
+//
+//                case .verified:
+//                    break
+//
+//                case .error:
+//                    break
+//                }
+//            }
     }
 
     
