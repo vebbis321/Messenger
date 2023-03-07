@@ -12,8 +12,8 @@ final class AuthPasswordTextFieldView: AuthTextFieldView<UITextField> {
 
     private var subscriptions = Set<AnyCancellable>()
 
-    private let showHidePasswordBtn = CustomIconBtn(icon: "eye.slash", size: 20)
-
+    private lazy var showHidePasswordBtn: UIButton = .createIconButton(icon: "eye.slash")
+    
     init(frame: CGRect = .zero, placeholder: String, returnKey: UIReturnKeyType) {
         super.init(placeholder: placeholder, returnKey: returnKey)
         updateLayout()
@@ -58,13 +58,15 @@ private extension AuthPasswordTextFieldView {
     }
 
     private func setUpAction() {
-        showHidePasswordBtn.action = { [weak self] in
+        showHidePasswordBtn.addAction(for: .touchUpInside, handler: { [weak self] _ in
             guard let self = self else { return }
-
             self.textField.togglePasswordVisibility()
             let isSecure = self.textField.isSecureTextEntry
-            self.showHidePasswordBtn.updateIcon(newIcon: "eye\(isSecure ? ".slash" : "")")
-        }
+            self.showHidePasswordBtn.updateIcon(
+                newIcon: "eye\(isSecure ? ".slash" : "")",
+                newColor: .theme.tintColor ?? .label
+            )
+        })
     }
 }
 

@@ -9,9 +9,9 @@ import UIKit
 
 final class AddPasswordVC: DefaultCreateAccountVC {
 
-    let subLabel = SubLabel(labelText: "Create a password with at least 6 letters and numbers. It should be something that others can't guess.")
+    let subLabel = UILabel.createSubLabel(with: "Create a password with at least 6 letters and numbers. It should be something that others can't guess.")
     let passwordTextField = AuthPasswordTextFieldView(placeholder: "Password", returnKey: .done)
-    let nextButton = AuthButton(title: "Next")
+    lazy var nextButton = UIButton.createAuthButton(with: "Next")
 
 
     override func viewDidLoad() {
@@ -33,7 +33,7 @@ private extension AddPasswordVC {
         // emailTextField
         passwordTextField.textField.delegate = self
 
-        nextButton.action = { [weak self] in
+        nextButton.addAction(for: .touchUpInside) { [weak self] _ in
             self?.coordinator?.goToAgreeAndCreateAccountVC()
         }
 

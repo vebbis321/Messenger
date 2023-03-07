@@ -7,7 +7,7 @@
 
 import UIKit
 
-class DateTextField: UITextField {
+class DisabledTextField: UITextField {
 
     override func caretRect(for position: UITextPosition) -> CGRect {
         return CGRect.zero

@@ -12,11 +12,11 @@ final class AddNameVC: DefaultCreateAccountVC {
 
     let viewModel = AddNameVM()
 
-    let subLabel = SubLabel(labelText: "Enter the name you use in real life.")
+    let subLabel: UILabel = .createSubLabel(with: "Enter the name you use in real life.") 
     let hStack = UIStackView(frame: .zero)
     let firstNameTextField = AuthTextFieldErrorView(placeholder: "First name", keyboard: .default, returnKey: .continue)
     let surnameTextField = AuthTextFieldErrorView(placeholder: "Surname", keyboard: .default, returnKey: .done)
-    let nextButton = AuthButton(title: "Next")
+    let nextButton = UIButton.createAuthButton(with: "Next")
 
     private var subscriptions = Set<AnyCancellable>()
     private var nameSubscription: AnyCancellable?
@@ -76,7 +76,7 @@ private extension AddNameVC {
         hStack.addArrangedSubview(surnameTextField)
 
         // nextBtn
-        nextButton.action = { [weak self] in
+        nextButton.addAction(for: .touchUpInside) { [weak self] _ in
             guard let self = self else { return }
 
             if self.viewModel.nameStatus.value == (.valid, .valid) {

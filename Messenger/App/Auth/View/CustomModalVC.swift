@@ -22,7 +22,7 @@ final class CustomModalVC: UIViewController {
         return view
     }()
     private var handle = SheetHandlerView()
-    private var closeButton = CustomIconBtn(icon: "xmark", weight: .semibold, size: 18)
+    private var closeButton: UIButton = .createIconButton(icon: "xmakr", size: 17, weight: .semibold)
     private var customView: UIView
 
     private let customHeight = UIScreen.main.bounds.height * 0.75
@@ -136,7 +136,7 @@ private extension CustomModalVC {
         handle.centerXAnchor.constraint(equalTo: modalContainerView.centerXAnchor).isActive = true
 
         // closeButton
-        closeButton.action = { [weak self] in
+        closeButton.addAction(for: .touchUpInside) { [weak self] _ in
             self?.dismiss(animated: true)
         }
         closeButton.topAnchor.constraint(equalTo: handle.bottomAnchor, constant: 20).isActive = true

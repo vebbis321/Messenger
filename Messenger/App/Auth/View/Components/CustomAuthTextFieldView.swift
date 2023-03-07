@@ -11,22 +11,8 @@ import Combine
 
 class CustomAuthTextFieldView: UIView {
 
-
     // MARK: - Components
-    private lazy var textField: UITextField = { [weak self] in
-        guard let self = self else { return UITextField() }
-        var txtField: UITextField!
-        // MARK: - FIX THIS HORRIBLE CODE
-        if self.viewModel.type == .Date {
-            txtField = DateTextField()
-        } else {
-            txtField = UITextField()
-        }
-        txtField.font = .systemFont(ofSize: 17, weight: .regular)
-        txtField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
-        txtField.delegate = self
-        return txtField
-    }()
+    private var textField: UITextField!
 
     private lazy var floatingLabel: UILabel = {
         let label = UILabel(frame: .zero)
@@ -34,47 +20,7 @@ class CustomAuthTextFieldView: UIView {
         return label
     }()
 
-    private lazy var rightViewButton: CustomIconBtn? = {
-        guard let btnConfig = viewModel.type.rightViewButton else { return nil }
-        let btn = CustomIconBtn(icon: btnConfig.icon, weight: .regular, size: btnConfig.size)
-        btn.isHidden = true
-        switch viewModel.type {
-        case .Default:
-            btn.action = clearBtnTapped
-        case .Password:
-            btn.action = toggleShowHidePasswordBtnTapped
-        case .Date:
-            break
-        }
-        return btn
-    }()
-
-
-    // MARK: - Actions
-    @objc private func handleTap() {
-        textField.becomeFirstResponder()
-    }
-
-    @objc private func textFieldDidChange(_ textField: UITextField) {
-        textState = textField.hasText ? .text : .isEmpty
-    }
-
-    private func clearBtnTapped() {
-        textField.text = ""
-        textState = .isEmpty
-    }
-
-    private func toggleShowHidePasswordBtnTapped() {
-        guard let rightViewButton = rightViewButton else { return }
-        textField.togglePasswordVisibility()
-        rightViewButton.updateIcon(
-            newIcon: textField.isSecureTextEntry ? "eye.slash" : "eye",
-            newColor: .theme.tintColor ?? .label,
-            newWeight: .regular,
-            newSize: 20
-        )
-
-    }
+    private lazy var rightViewButton: UIButton? = nil
 
     // MARK: - Properties
     private var viewModel: ViewModel
@@ -112,6 +58,7 @@ class CustomAuthTextFieldView: UIView {
         floatingLabel.transform = textState == .isEmpty ? .identity : .init(translationX: 0, y: -(textField.intrinsicContentSize.height * 0.45))
         floatingLabel.font = textState.floatingLabelFont
         textField.transform = textState.textFieldScale
+        floatingLabel.textColor = textState.floatingLabelColor
 
         guard errorState != .error else { return }
         floatingLabel.textColor = textState.floatingLabelColor
@@ -123,11 +70,10 @@ class CustomAuthTextFieldView: UIView {
     }
 
     private func evaluateErrorState() {
-        guard let state = errorState else {
-            return
-        }
+        guard let state = errorState else { return }
         floatingLabel.textColor = state.floatingLabelColor
         layer.borderColor = state.borderColor
+        evaluateButtonState()
     }
 
     private func evaluateButtonState() {
@@ -136,8 +82,8 @@ class CustomAuthTextFieldView: UIView {
         case .Default:
             switch textState {
             case .isEmpty:
-                // MARK: - Add Error state
-                rightViewButton.isHidden = true
+                rightViewButton.isHidden = errorState != .error
+                handleErrorStateIcon()
             case .text:
                 rightViewButton.isHidden = false
             }
@@ -150,6 +96,40 @@ class CustomAuthTextFieldView: UIView {
             }
         case .Date: break
         }
+    }
+
+    private func handleErrorStateIcon() {
+        guard let errorState = errorState else { return }
+//        switch errorState {
+//        case .normal:
+//            rightViewButton?.updateIcon(newIcon: <#T##String#>, newColor: <#T##UIColor#>, newWeight: <#T##UIImage.SymbolWeight#>, newSize: <#T##CGFloat#>)
+//        case .error:
+//            <#code#>
+//        }
+    }
+
+    // MARK: - Actions
+    @objc private func handleTap() {
+        textField.becomeFirstResponder()
+    }
+
+    @objc private func textFieldDidChange(_ textField: UITextField) {
+        textState = textField.hasText ? .text : .isEmpty
+    }
+
+    private func clearBtnTapped() {
+        textField.text = ""
+        textState = .isEmpty
+    }
+
+    private func toggleShowHidePasswordBtnTapped() {
+        guard let rightViewButton = rightViewButton else { return }
+        textField.togglePasswordVisibility()
+        rightViewButton.updateIcon(
+            newIcon: textField.isSecureTextEntry ? "eye.slash" : "eye",
+            newColor: .theme.tintColor ?? .label,
+            newWeight: .regular
+        )
     }
 
     init(frame: CGRect = .zero, viewModel: ViewModel) {
@@ -175,14 +155,29 @@ class CustomAuthTextFieldView: UIView {
         layer.cornerRadius = 3
         layer.borderColor = UIColor.theme.border?.cgColor
 
+        switch viewModel.type {
+        case .Date:
+            textField = DisabledTextField()
+        default:
+            textField = UITextField(frame: .zero)
+        }
+
+        // defualt
+        textField.font = .systemFont(ofSize: 17, weight: .regular)
+        textField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
+        textField.delegate = self
+
+        // custom
         textField.keyboardType = viewModel.keyboard
         textField.returnKeyType = viewModel.returnKey
         textField.textContentType = viewModel.textContentType
-        floatingLabel.text = viewModel.placeholder
 
-        floatingLabel.textColor = viewModel.type.textColor
+        floatingLabel.text = viewModel.placeholder
+        floatingLabel.textColor = viewModel.type.floatingLabelColor
+
         textField.textColor = viewModel.type.textColor
         textField.isSecureTextEntry = viewModel.type.isSecure
+
 
         addSubview(textField)
         addSubview(floatingLabel)
@@ -206,7 +201,24 @@ class CustomAuthTextFieldView: UIView {
         bottomAnchor.constraint(equalTo: textField.bottomAnchor, constant: 20).isActive = true
 
         // Add rightView if rightView is not nil
+        guard let rightViewBtnConf = viewModel.type.rightViewButton else { return }
+        rightViewButton = .createIconButton(
+              icon: rightViewBtnConf.icon,
+              size: rightViewBtnConf.size
+        )
         guard let rightViewButton = rightViewButton else { return }
+        rightViewButton.isHidden = true
+        rightViewButton.addAction(for: .touchUpInside) { [weak self] _ in
+            guard let self = self else { return }
+            switch self.viewModel.type {
+            case .Default:
+                self.clearBtnTapped()
+            case .Password:
+                self.toggleShowHidePasswordBtnTapped()
+            default: break
+            }
+        }
+
         addSubview(rightViewButton)
 
         rightViewButton.rightAnchor.constraint(equalTo: rightAnchor, constant: -15).isActive = true
@@ -299,7 +311,7 @@ extension CustomAuthTextFieldView {
         var floatingLabelColor: UIColor? {
             switch self {
             case .normal:
-                return .theme.floatingLabel
+                return .theme.placeholder
             case .error:
                 return .red
             }
@@ -325,9 +337,9 @@ private extension CustomAuthTextFieldView {
         var floatingLabelColor: UIColor? {
             switch self {
             case .isEmpty:
-                return .theme.floatingLabel
-            case .text:
                 return .theme.placeholder
+            case .text:
+                return .theme.floatingLabel
             }
         }
 
@@ -409,7 +421,13 @@ final class TextfieldVC: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
 
-        txtField.errorState = .error
+//        txtField.errorState = .error
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+            self.txtField.errorState = .error
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                self.txtField.errorState = .normal
+            }
+        }
     }
 }
 

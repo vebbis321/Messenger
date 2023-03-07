@@ -22,10 +22,9 @@ final class LogInVC: UIViewController {
     private var vStack: UIStackView!
     private let emailNumberTextField = AuthTextFieldClearView(placeholder: "Mobile number or email address", returnKey: .continue)
     private let passwordTextField = AuthPasswordTextFieldView(placeholder: "Password", returnKey: .done)
-    private let loginBtn = AuthButton(title: "Log In")
-    private let forgotPasswordBtn = TextButton(buttonText: "Forgotten Password?")
-
-    private let secondaryButton = SecondaryButton(buttonText: "Create new account")
+    private lazy var loginBtn = UIButton.createAuthButton(with: "Log In")
+    private lazy var forgotPasswordBtn: UIButton = .createTextButton(with: "Forgotten Password?")
+    private lazy var secondaryButton: UIButton = .createSecondaryButton(with: "Create new account")
     private let metaLogo = UIImageView(frame: .zero)
     
     override func viewDidLoad() {
@@ -78,15 +77,15 @@ final class LogInVC: UIViewController {
 // MARK: - Actions
 private extension LogInVC {
     private func setUpActions() {
-        loginBtn.action = {
+        loginBtn.addAction(for: .touchUpInside)  { action in
 
         }
 
-        forgotPasswordBtn.action = {
+        forgotPasswordBtn.addAction(for: .touchUpInside) { action in
 
         }
 
-        secondaryButton.action = { [weak self] in
+        secondaryButton.addAction(for: .touchUpInside) { [weak self] action in
             self?.coordinator?.startCreateAccountCoordinator()
         }
     }

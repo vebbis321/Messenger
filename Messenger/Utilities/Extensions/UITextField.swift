@@ -93,5 +93,7 @@ extension UITextField {
             selectedTextRange = nil
             selectedTextRange = existingSelectedTextRange
         }
+
+        becomeFirstResponder()
     }
 }

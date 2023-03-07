@@ -9,9 +9,9 @@ import UIKit
 
 final class AddEmailVC: DefaultCreateAccountVC {
 
-    let subLabel = SubLabel(labelText: "Enter the address at which you can be contacted. No one will see this on your profile.")
+    let subLabel: UILabel = .createSubLabel(with: "Enter the address at which you can be contacted. No one will see this on your profile.") 
     let emailTextField = AuthTextFieldClearView(placeholder: "Email address", keyboard: .emailAddress, returnKey: .done)
-    let nextButton = AuthButton(title: "Next")
+    let nextButton: UIButton = .createAuthButton(with: "Next")
 
 
     override func viewDidLoad() {
@@ -28,7 +28,7 @@ private extension AddEmailVC {
         // emailTextField
         emailTextField.textField.delegate = self
 
-        nextButton.action = { [weak self] in
+        nextButton.addAction(for: .touchUpInside) { [weak self] _ in
             self?.coordinator?.goToAddPasswordVC()
         }
 

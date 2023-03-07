@@ -12,7 +12,7 @@ final class AddBirthdayVC: DefaultCreateAccountVC {
     private let tappableSubText = TappableTextView()
     private let textFieldView = AuthDateTextFieldView()
     private let datePicker = UIDatePicker()
-    private let nextBtn = AuthButton(title: "Next")
+    private lazy var nextBtn = UIButton.createAuthButton(with: "Next")
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -90,7 +90,7 @@ private extension AddBirthdayVC {
         textFieldView.textField.delegate = self
 
         // nextBtn
-        nextBtn.action = { [weak self] in
+        nextBtn.addAction(for: .touchUpInside) { [weak self] _ in
             self?.coordinator?.goToAddEmailVC()
         }
 

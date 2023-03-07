@@ -11,7 +11,7 @@ import Combine
 class AuthTextFieldClearView: AuthTextFieldView<UITextField> {
 
     private var subscriptions = Set<AnyCancellable>()
-    let clearBtn = CustomIconBtn(icon: "xmark", size: 17)
+    lazy var clearBtn: UIButton = .createIconButton(icon: "xmark", size: 17)
 
     override init(frame: CGRect = .zero, placeholder: String, keyboard: UIKeyboardType = .default, returnKey: UIReturnKeyType) {
         super.init(placeholder: placeholder, keyboard: keyboard, returnKey: returnKey)
@@ -44,7 +44,7 @@ class AuthTextFieldClearView: AuthTextFieldView<UITextField> {
     }
 
     private func setUpActions() {
-        clearBtn.action = { [weak self] in
+        clearBtn.addAction(for: .touchUpInside) { [weak self] _ in
             self?.textField.text = ""
             NotificationCenter.default.post(
                 name:UITextField.textDidChangeNotification, object: self?.textField)

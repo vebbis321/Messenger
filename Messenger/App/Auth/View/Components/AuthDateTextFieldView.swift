@@ -8,7 +8,7 @@
 import UIKit
 import Combine
 
-final class AuthDateTextFieldView: AuthTextFieldView<DateTextField> {
+final class AuthDateTextFieldView: AuthTextFieldView<DisabledTextField> {
 
     private var subscriptions = Set<AnyCancellable>()
 

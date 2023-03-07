@@ -10,10 +10,10 @@ import UIKit
 final class AgreeAndCreateAccountVC: DefaultCreateAccountVC {
 
     let viewModel = AgreeAndCreateAccountVM()
-    let subLabel = SubLabel(labelText: "Create a password with at least 6 letters and numbers. It should be something that others can't guess.")
+    let subLabel = UILabel.createSubLabel(with: "Create a password with at least 6 letters and numbers. It should be something that others can't guess.")
     let tappableTextFields: [TappableTextView] = Array(0..<4).map { _ in .init() }
     let vStack = UIStackView(frame: .zero)
-    let nextButton = AuthButton(title: "I Agree")
+    let nextButton = UIButton.createAuthButton(with: "I Agree")
 
 
 
@@ -48,7 +48,7 @@ private extension AgreeAndCreateAccountVC {
         vStack.spacing = 20
 
         // nextBtn
-        nextButton.action = { [weak self] in
+        nextButton.addAction(for: .touchUpInside) { [weak self] _ in
 //            self?.coordinator?.goToAddEmailVC()
         }
 
