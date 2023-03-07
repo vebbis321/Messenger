@@ -26,7 +26,8 @@ public extension UIButton {
 
         // constraints
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.heightAnchor.constraint(equalToConstant: size).isActive = true
+        button.heightAnchor.constraint(greaterThanOrEqualToConstant: size).isActive = true
+        button.widthAnchor.constraint(equalToConstant: size).isActive = true
         return button
     }
 
@@ -36,13 +37,9 @@ public extension UIButton {
         newWeight: UIImage.SymbolWeight = .regular,
         newSize: CGFloat = 20
     ) {
-        let defaultColor: UIColor = newColor ?? .theme.tintColor!
-        let config = UIImage.SymbolConfiguration(weight: newWeight)
-        let iconImage = UIImage(systemName: newIcon, withConfiguration: config)?.withTintColor(defaultColor, renderingMode: .alwaysOriginal)
-        setImage(iconImage, for: .normal)
 
-        heightConstraint?.constant = newSize
-
+        setImage(UIImage(systemName: newIcon)?.withTintColor(newColor ?? .theme.tintColor!, renderingMode: .alwaysOriginal), for: .normal)
+        widthConstraint?.constant = newSize
     }
 }
 

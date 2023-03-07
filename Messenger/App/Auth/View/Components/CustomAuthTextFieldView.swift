@@ -21,7 +21,7 @@ class CustomAuthTextFieldView: UIView {
     }()
 
     private lazy var rightViewButton: UIButton? = nil
-    private lazy var errorRightView = UIButton.createIconButton(icon: "exclamationmark.circle", size: 17, weight: .regular)
+    private lazy var errorRightView = UIButton.createIconButton(icon: "exclamationmark.circle", size: 20, weight: .regular)
 
     // MARK: - Properties
     private var viewModel: ViewModel
@@ -93,7 +93,7 @@ class CustomAuthTextFieldView: UIView {
             switch textState {
             case .isEmpty:
                 if errorState != nil {
-                    rightViewButton.updateIcon(newIcon: "exclamationmark.circle", newColor: .red, newSize: 20)
+                    rightViewButton.updateIcon(newIcon: "exclamationmark.circle", newColor: .red, newSize: 17)
                     rightViewButton.isHidden = false
                 } else {
                     rightViewButton.isHidden = true
