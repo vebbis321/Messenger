@@ -21,6 +21,7 @@ class CustomAuthTextFieldView: UIView {
     }()
 
     private lazy var rightViewButton: UIButton? = nil
+    private lazy var errorRightView = UIButton.createIconButton(icon: "exclamationmark.circle", size: 17, weight: .regular)
 
     // MARK: - Properties
     private var viewModel: ViewModel
@@ -31,6 +32,7 @@ class CustomAuthTextFieldView: UIView {
     public var errorState: ErrorState? {
         didSet {
             evaluateErrorState()
+            evaluateButtonState()
         }
     }
 
@@ -70,10 +72,18 @@ class CustomAuthTextFieldView: UIView {
     }
 
     private func evaluateErrorState() {
-        guard let state = errorState else { return }
-        floatingLabel.textColor = state.floatingLabelColor
-        layer.borderColor = state.borderColor
-        evaluateButtonState()
+        switch errorState {
+        case .none:
+            floatingLabel.textColor = textState.floatingLabelColor
+            layer.borderColor = focusState.borderColor
+            rightViewButton?.updateIcon(newIcon: "xmark", newColor: .theme.tintColor, newSize: 17)
+
+        case .some(let state):
+            floatingLabel.textColor = state.floatingLabelColor
+            layer.borderColor = state.borderColor
+
+        }
+
     }
 
     private func evaluateButtonState() {
@@ -82,10 +92,17 @@ class CustomAuthTextFieldView: UIView {
         case .Default:
             switch textState {
             case .isEmpty:
-                rightViewButton.isHidden = errorState != .error
-                handleErrorStateIcon()
+                if errorState != nil {
+                    rightViewButton.updateIcon(newIcon: "exclamationmark.circle", newColor: .red, newSize: 20)
+                    rightViewButton.isHidden = false
+                } else {
+                    rightViewButton.isHidden = true
+                }
+
             case .text:
                 rightViewButton.isHidden = false
+                guard errorState != nil else { return }
+                rightViewButton.updateIcon(newIcon: "xmark", newColor: .theme.tintColor, newSize: 17)
             }
         case .Password:
             switch focusState {
@@ -98,15 +115,6 @@ class CustomAuthTextFieldView: UIView {
         }
     }
 
-    private func handleErrorStateIcon() {
-        guard let errorState = errorState else { return }
-//        switch errorState {
-//        case .normal:
-//            rightViewButton?.updateIcon(newIcon: <#T##String#>, newColor: <#T##UIColor#>, newWeight: <#T##UIImage.SymbolWeight#>, newSize: <#T##CGFloat#>)
-//        case .error:
-//            <#code#>
-//        }
-    }
 
     // MARK: - Actions
     @objc private func handleTap() {
@@ -232,16 +240,11 @@ class CustomAuthTextFieldView: UIView {
 // MARK: - UITextFieldDelegate
 extension CustomAuthTextFieldView: UITextFieldDelegate {
     func textFieldDidBeginEditing(_ textField: UITextField) {
-        // the color is red independent of the focus when the error state is triggered
-        if errorState != .error {
-            focusState = .active
-        }
+        focusState = .active
     }
 
     func textFieldDidEndEditing(_ textField: UITextField) {
-        if errorState != .error {
-            focusState = .inactive
-        }
+        focusState = .inactive
     }
 }
 
@@ -305,25 +308,14 @@ extension CustomAuthTextFieldView {
 // MARK: - Public States
 extension CustomAuthTextFieldView {
     public enum ErrorState {
-        case normal
         case error
 
         var floatingLabelColor: UIColor? {
-            switch self {
-            case .normal:
-                return .theme.placeholder
-            case .error:
-                return .red
-            }
+            return .red
         }
 
         var borderColor: CGColor? {
-            switch self {
-            case .normal:
-                return UIColor.theme.border?.cgColor
-            case .error:
-                return UIColor.red.cgColor
-            }
+            return UIColor.red.cgColor
         }
     }
 }
@@ -425,7 +417,7 @@ final class TextfieldVC: UIViewController {
         DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
             self.txtField.errorState = .error
             DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
-                self.txtField.errorState = .normal
+                self.txtField.errorState = nil
             }
         }
     }
