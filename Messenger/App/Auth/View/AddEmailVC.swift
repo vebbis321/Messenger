@@ -11,7 +11,7 @@ final class AddEmailVC: DefaultCreateAccountVC {
 
     let subLabel: UILabel = .createSubLabel(with: "Enter the address at which you can be contacted. No one will see this on your profile.") 
     let emailTextField = AuthTextFieldClearView(placeholder: "Email address", keyboard: .emailAddress, returnKey: .done)
-    let nextButton: UIButton = .createAuthButton(with: "Next")
+    let nextButton = AuthButton(title: "Next")
 
 
     override func viewDidLoad() {

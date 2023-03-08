@@ -22,7 +22,7 @@ final class LogInVC: UIViewController {
     private var vStack: UIStackView!
     private let emailNumberTextField = AuthTextFieldClearView(placeholder: "Mobile number or email address", returnKey: .continue)
     private let passwordTextField = AuthPasswordTextFieldView(placeholder: "Password", returnKey: .done)
-    private lazy var loginBtn = UIButton.createAuthButton(with: "Log In")
+    private lazy var loginBtn = AuthButton(title: "Log In")
     private lazy var forgotPasswordBtn: UIButton = .createTextButton(with: "Forgotten Password?")
     private lazy var secondaryButton: UIButton = .createSecondaryButton(with: "Create new account")
     private let metaLogo = UIImageView(frame: .zero)
@@ -33,8 +33,6 @@ final class LogInVC: UIViewController {
         setUpViews()
         setUpConstraints()
         setUpActions()
-
-
 
     }
 
@@ -77,7 +75,7 @@ final class LogInVC: UIViewController {
 // MARK: - Actions
 private extension LogInVC {
     private func setUpActions() {
-        loginBtn.addAction(for: .touchUpInside)  { action in
+        loginBtn.addAction(for: .touchUpInside)  { _ in 
 
         }
 

@@ -16,7 +16,7 @@ final class AddNameVC: DefaultCreateAccountVC {
     let hStack = UIStackView(frame: .zero)
     let firstNameTextField = AuthTextFieldErrorView(placeholder: "First name", keyboard: .default, returnKey: .continue)
     let surnameTextField = AuthTextFieldErrorView(placeholder: "Surname", keyboard: .default, returnKey: .done)
-    let nextButton = UIButton.createAuthButton(with: "Next")
+    let nextButton = AuthButton(title: "Next")
 
     private var subscriptions = Set<AnyCancellable>()
     private var nameSubscription: AnyCancellable?

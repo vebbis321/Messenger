@@ -21,7 +21,6 @@ class CustomAuthTextFieldView: UIView {
     }()
 
     private lazy var rightViewButton: UIButton? = nil
-    private lazy var errorRightView = UIButton.createIconButton(icon: "exclamationmark.circle", size: 20, weight: .regular)
 
     // MARK: - Properties
     private var viewModel: ViewModel
@@ -76,7 +75,7 @@ class CustomAuthTextFieldView: UIView {
         case .none:
             floatingLabel.textColor = textState.floatingLabelColor
             layer.borderColor = focusState.borderColor
-            rightViewButton?.updateIcon(newIcon: "xmark", newColor: .theme.tintColor, newSize: 17)
+            rightViewButton?.updateIcon(newIcon: "xmark", newColor: .theme.tintColor)
 
         case .some(let state):
             floatingLabel.textColor = state.floatingLabelColor
@@ -93,7 +92,7 @@ class CustomAuthTextFieldView: UIView {
             switch textState {
             case .isEmpty:
                 if errorState != nil {
-                    rightViewButton.updateIcon(newIcon: "exclamationmark.circle", newColor: .red, newSize: 17)
+                    rightViewButton.updateIcon(newIcon: "exclamationmark.circle", newColor: .red, newWeight: .bold, newSize: 25)
                     rightViewButton.isHidden = false
                 } else {
                     rightViewButton.isHidden = true
@@ -102,7 +101,7 @@ class CustomAuthTextFieldView: UIView {
             case .text:
                 rightViewButton.isHidden = false
                 guard errorState != nil else { return }
-                rightViewButton.updateIcon(newIcon: "xmark", newColor: .theme.tintColor, newSize: 17)
+                rightViewButton.updateIcon(newIcon: "xmark", newColor: .theme.tintColor)
             }
         case .Password:
             switch focusState {
@@ -283,7 +282,7 @@ extension CustomAuthTextFieldView {
                 case .Default:
                     return .init(icon: "xmark", size: 17)
                 case .Password:
-                    return .init(icon: "eye.slash", size: 20)
+                    return .init(icon: "eye.slash", size: 17)
                 case .Date:
                     return nil
                 }
@@ -400,6 +399,7 @@ final class TextfieldVC: UIViewController {
         view.addSubview(txtField2)
         view.addSubview(txtField3)
 
+
         txtField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
         txtField.pinSides(to: view, padding: 20)
 
@@ -408,6 +408,7 @@ final class TextfieldVC: UIViewController {
 
         txtField3.topAnchor.constraint(equalTo: txtField2.bottomAnchor, constant: 10).isActive = true
         txtField3.pinSides(to: view, padding: 20)
+
     }
 
     override func viewDidAppear(_ animated: Bool) {

@@ -13,8 +13,7 @@ final class AgreeAndCreateAccountVC: DefaultCreateAccountVC {
     let subLabel = UILabel.createSubLabel(with: "Create a password with at least 6 letters and numbers. It should be something that others can't guess.")
     let tappableTextFields: [TappableTextView] = Array(0..<4).map { _ in .init() }
     let vStack = UIStackView(frame: .zero)
-    let nextButton = UIButton.createAuthButton(with: "I Agree")
-
+    let nextButton = AuthButton(title: "I Agree")
 
 
     init(titleStr: String, password: String) {

@@ -11,35 +11,38 @@ import UIKit
 public extension UIButton {
     static func createIconButton(
         icon: String,
-        size: CGFloat = 20,
-        weight: UIImage.SymbolWeight = .regular
+        size: CGFloat = 17,
+        weight: UIImage.SymbolWeight = .medium
     ) -> UIButton {
 
-
         let button = IncreaseTapAreaButton()
-        let config = UIImage.SymbolConfiguration(weight: weight)
+
+        let config = UIImage.SymbolConfiguration(pointSize: size, weight: weight)
         let iconImage = UIImage(systemName: icon, withConfiguration: config)?.withTintColor(.theme.tintColor!, renderingMode: .alwaysOriginal)
         button.setImage(iconImage, for: .normal)
         button.contentVerticalAlignment = .fill
         button.contentHorizontalAlignment = .fill
         button.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+        button.backgroundColor = .green
 
         // constraints
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.heightAnchor.constraint(greaterThanOrEqualToConstant: size).isActive = true
-        button.widthAnchor.constraint(equalToConstant: size).isActive = true
+        button.heightAnchor.constraint(equalToConstant: size).isActive = true
         return button
     }
 
     func updateIcon(
         newIcon: String,
         newColor: UIColor? = nil,
-        newWeight: UIImage.SymbolWeight = .regular,
-        newSize: CGFloat = 20
+        newWeight: UIImage.SymbolWeight = .medium,
+        newSize: CGFloat = 17
     ) {
 
-        setImage(UIImage(systemName: newIcon)?.withTintColor(newColor ?? .theme.tintColor!, renderingMode: .alwaysOriginal), for: .normal)
-        widthConstraint?.constant = newSize
+        let config = UIImage.SymbolConfiguration(pointSize: newSize, weight: newWeight)
+        let iconImage = UIImage(systemName: newIcon, withConfiguration: config)?.withTintColor(newColor ?? .theme.tintColor!, renderingMode: .alwaysOriginal)
+        setImage(iconImage, for: .normal)
+        heightConstraint?.constant = newSize
+
     }
 }
 
@@ -72,51 +75,5 @@ public extension UIButton {
     }
 }
 
-// MARK: - AuthButton
-public extension UIButton {
-    static func createAuthButton(with title: String) -> LoadingButton {
-
-        let button = LoadingButton()
-        button.text = title
-        guard let titleLabel = button.titleLabel else { return button }
-        button.backgroundColor = .theme.button
-        button.setTitleColor(.theme.buttonText, for: .normal)
-        button.setTitleColor(.theme.buttonText, for: .highlighted)
-        button.layer.cornerRadius = 3
-        button.setTitle(button.text, for: .normal)
-        button.titleLabel?.font = .systemFont(ofSize: 17, weight: .regular)
-
-        // activityIndicator
-        button.activityIndicator.hidesWhenStopped = true
-        button.activityIndicator.color = .theme.buttonText
-
-        button.addSubview(button.activityIndicator)
-
-        // self
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.topAnchor.constraint(equalTo: titleLabel.topAnchor, constant: -15).isActive = true
-        button.bottomAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 15).isActive = true
-
-        // activityIndicator
-        button.activityIndicator.translatesAutoresizingMaskIntoConstraints = false
-        button.activityIndicator.centerYAnchor.constraint(equalTo: button.centerYAnchor).isActive = true
-        button.activityIndicator.centerXAnchor.constraint(equalTo: button.centerXAnchor).isActive = true
-
-        return button
-    }
-
-    func showLoading() {
-        guard let button = self as? LoadingButtonProtocol else { return }
-        button.setTitle("", for: .normal)
-        button.activityIndicator.startAnimating()
-
-    }
-
-    func hideLoading() {
-        guard let button = self as? LoadingButtonProtocol else { return }
-        button.setTitle(button.text, for: .normal)
-        button.activityIndicator.stopAnimating()
-    }
-}
 
 

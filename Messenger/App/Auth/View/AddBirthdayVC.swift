@@ -12,7 +12,7 @@ final class AddBirthdayVC: DefaultCreateAccountVC {
     private let tappableSubText = TappableTextView()
     private let textFieldView = AuthDateTextFieldView()
     private let datePicker = UIDatePicker()
-    private lazy var nextBtn = UIButton.createAuthButton(with: "Next")
+    private lazy var nextBtn = AuthButton(title: "Next")
 
     override func viewDidLoad() {
         super.viewDidLoad()

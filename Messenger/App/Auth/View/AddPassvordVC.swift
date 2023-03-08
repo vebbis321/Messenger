@@ -11,7 +11,7 @@ final class AddPasswordVC: DefaultCreateAccountVC {
 
     let subLabel = UILabel.createSubLabel(with: "Create a password with at least 6 letters and numbers. It should be something that others can't guess.")
     let passwordTextField = AuthPasswordTextFieldView(placeholder: "Password", returnKey: .done)
-    lazy var nextButton = UIButton.createAuthButton(with: "Next")
+    lazy var nextButton = AuthButton(title: "Next")
 
 
     override func viewDidLoad() {
