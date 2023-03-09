@@ -21,7 +21,12 @@ final class CustomModalVC: UIViewController {
         view.backgroundColor = .secondarySystemBackground
         return view
     }()
-    private var handle = SheetHandlerView()
+    private lazy var handle: UIView = {
+        let handle = UIView(frame: .zero)
+        handle.backgroundColor = .lightGray.withAlphaComponent(0.65)
+        handle.layer.masksToBounds = true
+        return handle
+    }()
     private var closeButton: UIButton = .createIconButton(icon: "xmakr", weight: .semibold)
     private var customView: UIView
 
@@ -50,6 +55,8 @@ final class CustomModalVC: UIViewController {
     }
     
     override func viewDidLayoutSubviews() {
+        handle.roundCorners(.allCorners, radius: 10)
+
         if !hasSetPointOrigin {
             hasSetPointOrigin = true
             pointOrigin = modalContainerView.frame.origin
@@ -132,6 +139,9 @@ private extension CustomModalVC {
         modalContainerView.pinSides(to: view)
 
         // handle
+        handle.translatesAutoresizingMaskIntoConstraints = false
+        handle.widthAnchor.constraint(equalToConstant: 40).isActive = true
+        handle.heightAnchor.constraint(equalToConstant: 4).isActive = true
         handle.topAnchor.constraint(equalTo: modalContainerView.topAnchor, constant: 8).isActive = true
         handle.centerXAnchor.constraint(equalTo: modalContainerView.centerXAnchor).isActive = true
 

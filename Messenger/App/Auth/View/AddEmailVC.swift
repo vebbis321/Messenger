@@ -9,9 +9,9 @@ import UIKit
 
 final class AddEmailVC: DefaultCreateAccountVC {
 
-    let subLabel: UILabel = .createSubLabel(with: "Enter the address at which you can be contacted. No one will see this on your profile.") 
-    let emailTextField = AuthTextFieldClearView(placeholder: "Email address", keyboard: .emailAddress, returnKey: .done)
-    let nextButton = AuthButton(title: "Next")
+    let subLabel: UILabel = .createSubLabel(with: "Enter the address at which you can be contacted. No one will see this on your profile.")
+    let emailTextField = AuthTextField(viewModel: .init(placeholder: "Email address", returnKey: .done, type: .Default))
+    let nextButton: UIButton = AuthButton(title: "Next")
 
 
     override func viewDidLoad() {
@@ -26,7 +26,7 @@ private extension AddEmailVC {
     private func setUpViews() {
 
         // emailTextField
-        emailTextField.textField.delegate = self
+
 
         nextButton.addAction(for: .touchUpInside) { [weak self] _ in
             self?.coordinator?.goToAddPasswordVC()
@@ -56,14 +56,4 @@ private extension AddEmailVC {
     }
 }
 
-// MARK: - TextFieldDelegate
-extension AddEmailVC: UITextFieldDelegate {
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        if textField == emailTextField.textField {
-            textField.resignFirstResponder()
-            // go to next view
-        }
-        return true
-    }
-}
 

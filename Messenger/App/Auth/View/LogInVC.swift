@@ -20,8 +20,8 @@ final class LogInVC: UIViewController {
     private let messengerLogo = UIImageView(frame: .zero)
 
     private var vStack: UIStackView!
-    private let emailNumberTextField = AuthTextFieldClearView(placeholder: "Mobile number or email address", returnKey: .continue)
-    private let passwordTextField = AuthPasswordTextFieldView(placeholder: "Password", returnKey: .done)
+    private let emailNumberTextField = AuthTextField(viewModel: .init(placeholder: "Mobile number or email address", returnKey: .continue, type: .Default))
+    private let passwordTextField = AuthTextField(viewModel: .init(placeholder: "Password", returnKey: .done, type: .Password))
     private lazy var loginBtn = AuthButton(title: "Log In")
     private lazy var forgotPasswordBtn: UIButton = .createTextButton(with: "Forgotten Password?")
     private lazy var secondaryButton: UIButton = .createSecondaryButton(with: "Create new account")
@@ -99,8 +99,8 @@ private extension LogInVC {
         messengerLogo.image = UIImage(named: "Icon")
 
         // txtFields
-        emailNumberTextField.textField.delegate = self
-        passwordTextField.textField.delegate = self
+        emailNumberTextField.delegate = self
+        passwordTextField.delegate = self
 
         // vStack
         vStack = .init(arrangedSubviews: [emailNumberTextField, passwordTextField, loginBtn, forgotPasswordBtn])
@@ -157,10 +157,10 @@ private extension LogInVC {
 }
 
 // MARK: - TextFieldDelegate
-extension LogInVC: UITextFieldDelegate {
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        if textField == emailNumberTextField.textField {
-            textField.resignFirstResponder()
+extension LogInVC: TextFieldDelegate {
+    func textFieldShouldReturn(_ textField: CustomTextField) -> Bool {
+        if textField == emailNumberTextField {
+            textField.textField.resignFirstResponder()
             passwordTextField.textField.becomeFirstResponder()
         } else {
             // login

@@ -14,8 +14,8 @@ final class AddNameVC: DefaultCreateAccountVC {
 
     let subLabel: UILabel = .createSubLabel(with: "Enter the name you use in real life.") 
     let hStack = UIStackView(frame: .zero)
-    let firstNameTextField = AuthTextFieldErrorView(placeholder: "First name", keyboard: .default, returnKey: .continue)
-    let surnameTextField = AuthTextFieldErrorView(placeholder: "Surname", keyboard: .default, returnKey: .done)
+    let firstNameTextField = AuthTextField(viewModel: .init(placeholder: "First name", returnKey: .continue, type: .Default))
+    let surnameTextField = AuthTextField(viewModel: .init(placeholder: "Surname", returnKey: .done, type: .Default))
     let nextButton = AuthButton(title: "Next")
 
     private var subscriptions = Set<AnyCancellable>()
@@ -41,20 +41,21 @@ private extension AddNameVC {
         nameSubscription = viewModel
             .nameStatus
             .removeDuplicates(by: { prev, curr in
-                prev.0 == curr.0 || prev.1 == curr.1
+                prev.0 == curr.0 && prev.1 == curr.1
             })
             .receive(on: DispatchQueue.main)
             .sink { [weak self] (firstNameStatus, surnameStatus) in
+                print(firstNameStatus, surnameStatus)
                 if firstNameStatus != .valid {
-                    self?.firstNameTextField.isError = true
+                    self?.firstNameTextField.errorState = .error
                 } else {
-                    self?.firstNameTextField.isError = false
+                    self?.firstNameTextField.errorState = nil
                 }
 
                 if surnameStatus != .valid {
-                    self?.surnameTextField.isError = true
+                    self?.surnameTextField.errorState = .error
                 } else {
-                    self?.surnameTextField.isError = false
+                    self?.surnameTextField.errorState = nil
                 }
             }
     }
@@ -65,8 +66,8 @@ private extension AddNameVC {
     private func setUpViews() {
 
         // txtFields
-        firstNameTextField.textField.delegate = self
-        surnameTextField.textField.delegate = self
+        firstNameTextField.delegate = self
+        surnameTextField.delegate = self
 
         // hStack
         hStack.axis = .horizontal
@@ -115,10 +116,10 @@ private extension AddNameVC {
 }
 
 // MARK: - TextFieldDelegate
-extension AddNameVC: UITextFieldDelegate {
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        if textField == firstNameTextField.textField {
-            textField.resignFirstResponder()
+extension AddNameVC: TextFieldDelegate {
+    func textFieldShouldReturn(_ textFieldView: CustomTextField) -> Bool {
+        if textFieldView == firstNameTextField {
+            textFieldView.textField.resignFirstResponder()
             surnameTextField.textField.becomeFirstResponder()
         } else {
             // nextBtn action

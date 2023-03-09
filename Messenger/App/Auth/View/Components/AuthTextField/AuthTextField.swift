@@ -8,11 +8,52 @@
 import UIKit
 import Combine
 
+public protocol CustomTextField: UIView {
+    var textField: UITextField { get set }
+}
 
-class CustomAuthTextFieldView: UIView {
+public protocol TextFieldDelegate: AnyObject {
+    func textFieldDidBeginEditing(_ customTextField: CustomTextField)
+    func textFieldDidEndEditing(_ customTextField: CustomTextField)
+    func textFieldShouldReturn(_ customTextField: CustomTextField) -> Bool
+    func textField(_ customTextField: CustomTextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool
+    func textFieldDidChange(_ customTextField: CustomTextField)
+    func textFieldDidTapMultilineAction(_ customTextField: CustomTextField)
+}
+
+public extension TextFieldDelegate {
+    func textFieldDidBeginEditing(_ customTextField: CustomTextField) {
+        // Default empty implementation
+    }
+
+    func textFieldDidEndEditing(_ customTextField: CustomTextField) {
+        // Default empty implementation
+    }
+
+    func textFieldShouldReturn(_ customTextField: CustomTextField) -> Bool {
+        return true
+    }
+
+    func textField(_ customTextField: CustomTextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        return true
+    }
+
+    func textFieldDidChange(_ customTextField: CustomTextField) {
+        // Default empty implementation
+    }
+
+    func textFieldDidTapMultilineAction(_ customTextField: CustomTextField) {
+        // Default empty implementation
+    }
+}
+
+
+class AuthTextField: UIView, CustomTextField {
 
     // MARK: - Components
-    private var textField: UITextField!
+    lazy var textField: UITextField = {
+        return viewModel.type.textFieldType
+    }()
     private lazy var floatingLabel: UILabel = {
         let label = UILabel(frame: .zero)
         label.font = .systemFont(ofSize: 17, weight: .regular)
@@ -29,10 +70,20 @@ class CustomAuthTextFieldView: UIView {
         return datePicker
     }()
 
-    // MARK: - Properties
+    // MARK: - override
+    override func didMoveToWindow() {
+        // similar to viewWillAppear
+        guard viewModel.type == .Date else { return }
+        updateDate()
+    }
+
+    // MARK: - Private Properties
     private var viewModel: ViewModel
     private let padding: CGFloat = 15
     private var txtFieldRightAnchorConstraint: NSLayoutConstraint!
+
+    // MARK: - Delegate
+    weak var delegate: TextFieldDelegate?
 
     // MARK: - Public TextField State
     public var errorState: ErrorState? {
@@ -181,14 +232,11 @@ class CustomAuthTextFieldView: UIView {
 
         switch viewModel.type {
         case .Date:
-            textField = DisabledTextField()
             textField.inputView = datePicker
             textField.transform = .init(translationX: 0, y: 7.5)
             floatingLabel.font = .systemFont(ofSize: 13, weight: .regular)
             floatingLabel.transform = .init(translationX: 0, y: -(textField.intrinsicContentSize.height * 0.45))
-            updateDate()
-        default:
-            textField = UITextField(frame: .zero)
+        default:  break
         }
 
         // defualt
@@ -231,7 +279,7 @@ class CustomAuthTextFieldView: UIView {
         bottomAnchor.constraint(equalTo: textField.bottomAnchor, constant: 20).isActive = true
 
         // Add rightView if rightView is not nil
-        guard let iconBtnConf = viewModel.type.rightViewButton else { return }
+        guard let iconBtnConf = viewModel.type.iconButton else { return }
         iconButton = .createIconButton(
               icon: iconBtnConf.icon
         )
@@ -259,8 +307,9 @@ class CustomAuthTextFieldView: UIView {
 }
 
 // MARK: - UITextFieldDelegate
-extension CustomAuthTextFieldView: UITextFieldDelegate {
+extension AuthTextField: UITextFieldDelegate {
     func textFieldDidBeginEditing(_ textField: UITextField) {
+        delegate?.textFieldDidBeginEditing(self)
         focusState = .active
     }
 
@@ -284,156 +333,27 @@ extension CustomAuthTextFieldView: UITextFieldDelegate {
         }
         return true
     }
-}
 
-extension CustomAuthTextFieldView {
-    // MARK: - ViewModel
-    struct ViewModel {
-        enum TextFieldType {
-            case Default
-            case Password
-            case Date
-
-            var isSecure: Bool {
-                self == .Password ? true : false
-            }
-
-            var floatingLabelColor: UIColor? {
-                switch self {
-                case .Date:
-                    return .theme.floatingLabel
-                default:
-                    return .theme.placeholder
-                }
-            }
-
-            var textColor: UIColor? {
-                switch self {
-                case .Date:
-                    return .clear
-                default:
-                    return .label
-                }
-            }
-
-            var tintColor: UIColor {
-                switch self {
-                case .Date:
-                    return .clear
-                default:
-                    return .theme.tintColor ?? .label
-                }
-            }
-
-            var rightViewButton: RightViewButton? {
-                switch self {
-                case .Default:
-                    return .init(icon: "xmark", size: 17)
-                case .Password:
-                    return .init(icon: "eye.slash", size: 17)
-                case .Date:
-                    return nil
-                }
-            }
-
-        }
-
-        struct RightViewButton {
-            let icon: String
-            let size: CGFloat
-        }
-
-        let placeholder: String
-        let keyboard: UIKeyboardType = .default
-        let returnKey: UIReturnKeyType
-        let textContentType: UITextContentType? = nil
-        let type: TextFieldType
-    }
-
-}
-
-// MARK: - Public States
-extension CustomAuthTextFieldView {
-    public enum ErrorState {
-        case error
-
-        var floatingLabelColor: UIColor? {
-            return .red
-        }
-
-        var borderColor: CGColor? {
-            return UIColor.red.cgColor
-        }
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        return delegate?.textFieldShouldReturn(self) ?? true
     }
 }
 
-// MARK: - Private States
-private extension CustomAuthTextFieldView {
-    private enum TextState {
-        case isEmpty
-        case text
 
-        var floatingLabelColor: UIColor? {
-            switch self {
-            case .isEmpty:
-                return .theme.placeholder
-            case .text:
-                return .theme.floatingLabel
-            }
-        }
 
-        var floatingLabelFont: UIFont {
-            switch self {
-            case .isEmpty:
-                return  .systemFont(ofSize: 17, weight: .regular)
-            case .text:
-                return .systemFont(ofSize: 13, weight: .regular)
-            }
-        }
 
-        var textFieldScale: CGAffineTransform {
-            switch self {
-            case .isEmpty:
-                return .identity
-            case .text:
-                return CGAffineTransform(translationX: 0, y: 7.5)
-            }
-        }
-
-    }
-
-    private enum FocusState {
-        case active
-        case inactive
-
-        var borderColor: CGColor? {
-            switch self {
-            case .active:
-                return UIColor.theme.activeBorder?.cgColor
-            case .inactive:
-                return UIColor.theme.border?.cgColor
-            }
-        }
-    }
-
-    private enum ButtonState {
-        case isHidden
-        case isShown
-    }
-
-}
 
 // MARK: - Test VC
 final class TextfieldVC: UIViewController {
-    let txtField = CustomAuthTextFieldView(
+    let txtField = AuthTextField(
         viewModel: .init(
             placeholder: "Clear",
             returnKey: .default, type: .Default))
-    let txtField2 = CustomAuthTextFieldView(
+    let txtField2 = AuthTextField(
         viewModel: .init(
             placeholder: "Password",
             returnKey: .default, type: .Password))
-    let txtField3 = CustomAuthTextFieldView(
+    let txtField3 = AuthTextField(
         viewModel: .init(
             placeholder: "Date",
             returnKey: .default, type: .Date))
@@ -487,62 +407,3 @@ struct TxtFieldVCPreview: PreviewProvider {
 }
 
 
-
-extension UITextField {
-    func applyCustomClearButton() {
-        clearButtonMode = .never
-        rightViewMode   = .whileEditing
-
-        let padding: CGFloat = 15
-
-        let clearButton = UIButton(frame: .init(x: padding, y: 0, width: 17, height: 17))
-        clearButton.setImage(UIImage(systemName: "xmark")?.withTintColor(.theme.tintColor ?? .label, renderingMode: .alwaysOriginal), for: .normal)
-
-        clearButton.addAction(for: .touchUpInside) { [weak self] action in
-            self?.text = ""
-        }
-
-        let view = UIView(frame: CGRect(x: 0, y: 0, width: padding + 17, height: 17))
-        view.addSubview(clearButton)
-
-        rightView = view
-    }
-
-    func applyShowHidePasswordBtn() {
-        clearButtonMode = .never
-        rightViewMode   = .whileEditing
-
-        let padding: CGFloat = 15
-
-        let btn = UIButton(frame: .init(x: padding, y: 0, width: 20, height: 20))
-        btn.setImage(UIImage(systemName: "eye.slash")?.withTintColor(.theme.tintColor ?? .label, renderingMode: .alwaysOriginal), for: .normal)
-
-        btn.addAction(for: .touchUpInside) { [weak self] action in
-            guard let self = self else { return }
-            self.togglePasswordVisibility()
-            btn.setImage(
-                UIImage(systemName: self.isSecureTextEntry ? "eye.slash" : "eye")?.withTintColor(.theme.tintColor ?? .label, renderingMode: .alwaysOriginal), for: .normal)
-        }
-
-        let view = UIView(frame: CGRect(x: 0, y: 0, width: padding + 20, height: 20))
-        view.addSubview(btn)
-
-        rightView = view
-    }
-
-    func applyErrorImage() {
-        clearButtonMode = .never
-        rightViewMode   = .always
-
-        let padding: CGFloat = 15
-
-        let image = UIImageView(frame: .init(x: padding, y: 0, width: 17, height: 17))
-        image.image =  UIImage(systemName: "exclamationmark.circle")?.withTintColor(.red, renderingMode: .alwaysOriginal)
-
-        let view = UIView(frame: CGRect(x: 0, y: 0, width: padding + 20, height: 17))
-        view.addSubview(image)
-
-        rightView = view
-    }
-
-}

@@ -10,8 +10,7 @@ import UIKit
 final class AddBirthdayVC: DefaultCreateAccountVC {
 
     private let tappableSubText = TappableTextView()
-    private let textFieldView = AuthDateTextFieldView()
-    private let datePicker = UIDatePicker()
+    private let textFieldView = AuthTextField(viewModel: .init(placeholder: "", returnKey: .default, type: .Date))
     private lazy var nextBtn = AuthButton(title: "Next")
 
     override func viewDidLoad() {
@@ -21,44 +20,6 @@ final class AddBirthdayVC: DefaultCreateAccountVC {
         setUpConstraints()
 
     }
-
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        updateDate()
-    }
-}
-
-// MARK: - Action
-extension AddBirthdayVC {
-    @objc func handleDateChanged() {
-        updateDate()
-    }
-
-    func updateDate() {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .long
-        textFieldView.textField.text = formatter.string(from: datePicker.date)
-        let age = Calendar.current.dateComponents([.year], from: datePicker.date, to: Date())
-        textFieldView.floatingLabel.text = "Date of birth (\(age.year ?? 0) year old)"
-    }
-}
-
-// MARK: - UITextFieldDelegate
-extension AddBirthdayVC: UITextFieldDelegate {
-    func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
-           if textField.tag == 1 {
-               textField.text = ""
-               return false
-           }
-           return true
-       }
-       func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
-           if textField.tag == 1 {
-               textField.text = ""
-               return false
-           }
-           return true
-       }
 }
 
 
@@ -77,17 +38,6 @@ private extension AddBirthdayVC {
             self?.present(slideVC, animated: true)
             return false
         }
-
-        // datePicker
-        datePicker.preferredDatePickerStyle = .wheels
-        datePicker.timeZone = .autoupdatingCurrent
-        datePicker.datePickerMode = .date
-        datePicker.maximumDate = Date()
-        datePicker.addTarget(self, action: #selector(handleDateChanged), for: .valueChanged)
-
-        // textFieldView
-        textFieldView.textField.inputView = datePicker
-        textFieldView.textField.delegate = self
 
         // nextBtn
         nextBtn.addAction(for: .touchUpInside) { [weak self] _ in
