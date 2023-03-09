@@ -13,14 +13,21 @@ class CustomAuthTextFieldView: UIView {
 
     // MARK: - Components
     private var textField: UITextField!
-
     private lazy var floatingLabel: UILabel = {
         let label = UILabel(frame: .zero)
         label.font = .systemFont(ofSize: 17, weight: .regular)
         return label
     }()
-
-    private lazy var rightViewButton: UIButton? = nil
+    private lazy var iconButton: UIButton? = nil
+    private lazy var datePicker: UIDatePicker = {
+        let datePicker = UIDatePicker()
+        datePicker.preferredDatePickerStyle = .wheels
+        datePicker.timeZone = .autoupdatingCurrent
+        datePicker.datePickerMode = .date
+        datePicker.maximumDate = Date()
+        datePicker.addTarget(self, action: #selector(handleDateChanged), for: .valueChanged)
+        return datePicker
+    }()
 
     // MARK: - Properties
     private var viewModel: ViewModel
@@ -46,14 +53,13 @@ class CustomAuthTextFieldView: UIView {
     private var textState: TextState = .isEmpty {
         didSet {
             guard viewModel.type != .Date else { return }
-            evaluateTextState()
+            evaluateIsTextEmptyState()
             evaluateButtonState()
         }
     }
 
-
     // MARK: - Private Methods
-    private func evaluateTextState() {
+    private func evaluateIsTextEmptyState() {
         // so we don't set the properties of textField if its already set
         guard textField.transform != textState.textFieldScale else { return }
         floatingLabel.transform = textState == .isEmpty ? .identity : .init(translationX: 0, y: -(textField.intrinsicContentSize.height * 0.45))
@@ -75,24 +81,23 @@ class CustomAuthTextFieldView: UIView {
         case .none:
             floatingLabel.textColor = textState.floatingLabelColor
             layer.borderColor = focusState.borderColor
-            rightViewButton?.updateIcon(newIcon: "xmark", newColor: .theme.tintColor)
+            iconButton?.updateIcon(newIcon: "xmark", newColor: .theme.tintColor)
 
         case .some(let state):
             floatingLabel.textColor = state.floatingLabelColor
             layer.borderColor = state.borderColor
-
         }
 
     }
 
     private func evaluateButtonState() {
-        guard let rightViewButton = rightViewButton else { return }
+        guard let rightViewButton = iconButton else { return }
         switch viewModel.type {
         case .Default:
             switch textState {
             case .isEmpty:
                 if errorState != nil {
-                    rightViewButton.updateIcon(newIcon: "exclamationmark.circle", newColor: .red, newWeight: .bold, newSize: 25)
+                    rightViewButton.updateIcon(newIcon: "exclamationmark.circle", newColor: .red, newWeight: .bold, newSize: 20)
                     rightViewButton.isHidden = false
                 } else {
                     rightViewButton.isHidden = true
@@ -101,7 +106,7 @@ class CustomAuthTextFieldView: UIView {
             case .text:
                 rightViewButton.isHidden = false
                 guard errorState != nil else { return }
-                rightViewButton.updateIcon(newIcon: "xmark", newColor: .theme.tintColor)
+                rightViewButton.updateIcon(newIcon: "xmark", newColor: .theme.tintColor, newSize: 17)
             }
         case .Password:
             switch focusState {
@@ -130,13 +135,25 @@ class CustomAuthTextFieldView: UIView {
     }
 
     private func toggleShowHidePasswordBtnTapped() {
-        guard let rightViewButton = rightViewButton else { return }
+        guard let rightViewButton = iconButton else { return }
         textField.togglePasswordVisibility()
         rightViewButton.updateIcon(
             newIcon: textField.isSecureTextEntry ? "eye.slash" : "eye",
             newColor: .theme.tintColor ?? .label,
             newWeight: .regular
         )
+    }
+
+    @objc private func handleDateChanged() {
+        updateDate()
+    }
+
+    private func updateDate() {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .long
+        textField.text = formatter.string(from: datePicker.date)
+        let age = Calendar.current.dateComponents([.year], from: datePicker.date, to: Date())
+        floatingLabel.text = "Date of birth (\(age.year ?? 0) year old)"
     }
 
     init(frame: CGRect = .zero, viewModel: ViewModel) {
@@ -165,6 +182,11 @@ class CustomAuthTextFieldView: UIView {
         switch viewModel.type {
         case .Date:
             textField = DisabledTextField()
+            textField.inputView = datePicker
+            textField.transform = .init(translationX: 0, y: 7.5)
+            floatingLabel.font = .systemFont(ofSize: 13, weight: .regular)
+            floatingLabel.transform = .init(translationX: 0, y: -(textField.intrinsicContentSize.height * 0.45))
+            updateDate()
         default:
             textField = UITextField(frame: .zero)
         }
@@ -179,11 +201,12 @@ class CustomAuthTextFieldView: UIView {
         textField.returnKeyType = viewModel.returnKey
         textField.textContentType = viewModel.textContentType
 
+
         floatingLabel.text = viewModel.placeholder
         floatingLabel.textColor = viewModel.type.floatingLabelColor
 
-        textField.textColor = viewModel.type.textColor
         textField.isSecureTextEntry = viewModel.type.isSecure
+        textField.tintColor = viewModel.type.tintColor
 
 
         addSubview(textField)
@@ -208,14 +231,13 @@ class CustomAuthTextFieldView: UIView {
         bottomAnchor.constraint(equalTo: textField.bottomAnchor, constant: 20).isActive = true
 
         // Add rightView if rightView is not nil
-        guard let rightViewBtnConf = viewModel.type.rightViewButton else { return }
-        rightViewButton = .createIconButton(
-              icon: rightViewBtnConf.icon,
-              size: rightViewBtnConf.size
+        guard let iconBtnConf = viewModel.type.rightViewButton else { return }
+        iconButton = .createIconButton(
+              icon: iconBtnConf.icon
         )
-        guard let rightViewButton = rightViewButton else { return }
-        rightViewButton.isHidden = true
-        rightViewButton.addAction(for: .touchUpInside) { [weak self] _ in
+        guard let iconBtn = iconButton else { return }
+        iconBtn.isHidden = true
+        iconBtn.addAction(for: .touchUpInside) { [weak self] _ in
             guard let self = self else { return }
             switch self.viewModel.type {
             case .Default:
@@ -226,11 +248,11 @@ class CustomAuthTextFieldView: UIView {
             }
         }
 
-        addSubview(rightViewButton)
-
-        rightViewButton.rightAnchor.constraint(equalTo: rightAnchor, constant: -15).isActive = true
-        rightViewButton.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
-        txtFieldRightAnchorConstraint.constant = -(30 + rightViewButton.intrinsicContentSize.width)
+        addSubview(iconBtn)
+        iconBtn.translatesAutoresizingMaskIntoConstraints = false
+        iconBtn.rightAnchor.constraint(equalTo: rightAnchor, constant: -15).isActive = true
+        iconBtn.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
+        txtFieldRightAnchorConstraint.constant = -(30 + iconBtn.intrinsicContentSize.width)
         layoutIfNeeded()
 
     }
@@ -244,6 +266,23 @@ extension CustomAuthTextFieldView: UITextFieldDelegate {
 
     func textFieldDidEndEditing(_ textField: UITextField) {
         focusState = .inactive
+    }
+
+    func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
+        guard viewModel.type == .Date else { return true }
+        if textField.tag == 1 {
+            textField.text = ""
+            return false
+        }
+        return true
+    }
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        guard viewModel.type == .Date else { return true }
+        if textField.tag == 1 {
+            textField.text = ""
+            return false
+        }
+        return true
     }
 }
 
@@ -274,6 +313,15 @@ extension CustomAuthTextFieldView {
                     return .clear
                 default:
                     return .label
+                }
+            }
+
+            var tintColor: UIColor {
+                switch self {
+                case .Date:
+                    return .clear
+                default:
+                    return .theme.tintColor ?? .label
                 }
             }
 

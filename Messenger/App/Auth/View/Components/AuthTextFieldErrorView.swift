@@ -82,8 +82,7 @@ private extension AuthTextFieldErrorView {
         layer.borderColor = UIColor.theme.activeBorder?.cgColor
 
         clearBtn.updateIcon(
-            newIcon: "xmark",
-            newSize: 17
+            newIcon: "xmark"
         )
         clearBtn.isEnabled = true
 
@@ -119,8 +118,7 @@ private extension AuthTextFieldErrorView {
 
     private func errorTextFieldBecameNonEmpty() {
         clearBtn.updateIcon(
-            newIcon: "xmark",
-            newSize: 17
+            newIcon: "xmark"
         )
         clearBtn.isEnabled = true
         clearBtn.isHidden = false

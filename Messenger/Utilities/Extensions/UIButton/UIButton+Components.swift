@@ -23,11 +23,8 @@ public extension UIButton {
         button.contentVerticalAlignment = .fill
         button.contentHorizontalAlignment = .fill
         button.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
-        button.backgroundColor = .green
+        button.imageView?.contentMode = .scaleAspectFit
 
-        // constraints
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.heightAnchor.constraint(equalToConstant: size).isActive = true
         return button
     }
 
@@ -41,7 +38,6 @@ public extension UIButton {
         let config = UIImage.SymbolConfiguration(pointSize: newSize, weight: newWeight)
         let iconImage = UIImage(systemName: newIcon, withConfiguration: config)?.withTintColor(newColor ?? .theme.tintColor!, renderingMode: .alwaysOriginal)
         setImage(iconImage, for: .normal)
-        heightConstraint?.constant = newSize
 
     }
 }

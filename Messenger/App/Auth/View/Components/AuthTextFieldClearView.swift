@@ -11,7 +11,7 @@ import Combine
 class AuthTextFieldClearView: AuthTextFieldView<UITextField> {
 
     private var subscriptions = Set<AnyCancellable>()
-    lazy var clearBtn: UIButton = .createIconButton(icon: "xmark", size: 17)
+    lazy var clearBtn: UIButton = .createIconButton(icon: "xmark")
 
     override init(frame: CGRect = .zero, placeholder: String, keyboard: UIKeyboardType = .default, returnKey: UIReturnKeyType) {
         super.init(placeholder: placeholder, keyboard: keyboard, returnKey: returnKey)
