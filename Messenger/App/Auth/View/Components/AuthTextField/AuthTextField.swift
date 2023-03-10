@@ -48,117 +48,6 @@ public extension TextFieldDelegate {
     }
 }
 
-protocol CustomValidation {
-    func validate(subject: AnyPublisher<String, Never>) -> AnyPublisher<ValidationState, Never>
-}
-
-extension CustomValidation {
-    private func defaultTextPublisher<S: Subject>(subject: S) -> AnyPublisher<String, Never> where S.Output == String, S.Failure == Never{
-        subject
-            .debounce(for: 0.2, scheduler: RunLoop.main)
-            .removeDuplicates()
-            .eraseToAnyPublisher()
-    }
-
-    func isEmpty(with subject: AnyPublisher<String, Never>) -> AnyPublisher<Bool, Never> {
-        subject
-            .debounce(for: 0.2, scheduler: RunLoop.main)
-            .removeDuplicates()
-            .map {
-                print("Isempty")
-               return $0.isEmpty
-            }
-            .eraseToAnyPublisher()
-    }
-
-    func isToShort(with subject: CurrentValueSubject<String, Never>) -> AnyPublisher<Bool, Never> {
-        defaultTextPublisher(subject: subject)
-            .map { !($0.count >= 2) }
-            .eraseToAnyPublisher()
-    }
-
-    func hasNumbers(with subject: CurrentValueSubject<String, Never>) -> AnyPublisher<Bool, Never> {
-        defaultTextPublisher(subject: subject)
-            .map { $0.hasNumbers() }
-            .eraseToAnyPublisher()
-    }
-
-    func hasSpecialChars(with subject: CurrentValueSubject<String, Never>) -> AnyPublisher<Bool, Never> {
-        defaultTextPublisher(subject: subject)
-            .map { $0.hasSpecialCharacters() }
-            .eraseToAnyPublisher()
-    }
-
-    func isEmail(with subject: AnyPublisher<String, Never>) -> AnyPublisher<Bool, Never> {
-        subject
-            .debounce(for: 0.2, scheduler: RunLoop.main)
-            .removeDuplicates()
-            .map { print("iseMail")
-                return $0.isValidEmail() }
-            .eraseToAnyPublisher()
-    }
-}
-
-enum ValidatorType  {
-    case email
-    case phone
-}
-
-enum ValidationState {
-    case error(ErrorState)
-    case valid
-
-    enum ErrorState: String {
-        case empty
-        case invalidEmail
-    }
-}
-
-
-struct EmailValidator: CustomValidation {
-
-    func validate(
-        subject: AnyPublisher<String, Never>
-    ) -> AnyPublisher<ValidationState, Never> {
-        Publishers.CombineLatest(
-            isEmpty(with: subject),
-            isEmail(with: subject)
-        )
-        .removeDuplicates(by: { prev, curr in
-            prev.0 == curr.0 && prev.1 == curr.1
-        })
-        .map { isEmpty, isEmail in
-            print("I got trigged")
-            if isEmpty { return .error(.empty) }
-            if !isEmail { return .error(.invalidEmail) }
-            return .valid
-        }
-        .eraseToAnyPublisher()
-
-    }
-}
-
-enum ValidatorFactory {
-    static func validateForType(type: ValidatorType) -> CustomValidation {
-        switch type {
-        case .email:
-            return EmailValidator()
-        case .phone:
-            return EmailValidator()
-        }
-    }
-}
-
-protocol Validator {
-    func validateText(validationType: ValidatorType) -> AnyPublisher<ValidationState, Never>
-}
-
-extension UITextField: Validator {
-    func validateText(validationType: ValidatorType) -> AnyPublisher<ValidationState, Never> {
-        let validator = ValidatorFactory.validateForType(type: validationType)
-        return validator.validate(subject: self.textPublisher())
-    }
-}
 
 class AuthTextField: UIView, CustomTextField {
 
@@ -204,8 +93,10 @@ class AuthTextField: UIView, CustomTextField {
 
     // MARK: - Public TextField State
     private var subscriptions = Set<AnyCancellable>()
+    var textFieldSubject = CurrentValueSubject<String, Never>("")
     public func validate() {
-        textField.validateText(validationType: .email)
+        textField.createBinding(with: textFieldSubject, storeIn: &subscriptions)
+        textField.validateText(validationType: .email, subject: textFieldSubject)
             .sink { state in
                 print(state, self.viewModel.type)
             }
