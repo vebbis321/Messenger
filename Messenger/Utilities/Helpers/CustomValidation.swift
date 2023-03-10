@@ -8,22 +8,22 @@
 import UIKit
 import Combine
 
+protocol GenericStrSubject: Subject where Self.Output == String, Self.Failure == Never { }
+
 protocol CustomValidation {
     func validate(subject: CurrentValueSubject<String, Never>) -> AnyPublisher<ValidationState, Never>
 }
 
 extension CustomValidation {
-    private func defaultTextPublisher<S: Subject>(subject: S) -> AnyPublisher<String, Never> where S.Output == String, S.Failure == Never {
+    private func defaultTextPublisher(subject: some GenericStrSubject) -> AnyPublisher<String, Never>  {
         subject
             .debounce(for: 0.2, scheduler: RunLoop.main)
             .removeDuplicates()
             .eraseToAnyPublisher()
     }
 
-    func isEmpty(with subject: CurrentValueSubject<String, Never>) -> AnyPublisher<Bool, Never> {
-        subject
-            .debounce(for: 0.2, scheduler: RunLoop.main)
-            .removeDuplicates()
+    func isEmpty(with subject: any GenericStrSubject) -> AnyPublisher<Bool, Never> {
+        defaultTextPublisher(subject: subject)
             .map {
                return $0.isEmpty
             }
@@ -48,10 +48,8 @@ extension CustomValidation {
             .eraseToAnyPublisher()
     }
 
-    func isEmail(with subject: CurrentValueSubject<String, Never>) -> AnyPublisher<Bool, Never> {
-        subject
-            .debounce(for: 0.2, scheduler: RunLoop.main)
-            .removeDuplicates()
+    func isEmail<S: Subject>(with subject: S) -> AnyPublisher<Bool, Never> where S.Output == String, S.Failure == Never {
+       defaultTextPublisher(subject: subject)
             .map {
                 return $0.isValidEmail() }
             .eraseToAnyPublisher()
@@ -75,6 +73,28 @@ enum ValidationState {
 
 struct EmailValidator: CustomValidation {
 
+    func validate<S: Subject>(
+        subject: S
+    ) -> AnyPublisher<ValidationState, Never> where S.Output == String, S.Failure == Never {
+        Publishers.CombineLatest(
+            isEmpty(with: subject),
+            isEmail(with: subject)
+        )
+        .removeDuplicates(by: { prev, curr in
+            prev.0 == curr.0 && prev.1 == curr.1
+        })
+        .map { isEmpty, isEmail in
+            if isEmpty { return .error(.empty) }
+            if !isEmail { return .error(.invalidEmail) }
+            return .valid
+        }
+        .eraseToAnyPublisher()
+
+    }
+}
+
+struct PhoneValidator: CustomValidation {
+
     func validate(
         subject: CurrentValueSubject<String, Never>
     ) -> AnyPublisher<ValidationState, Never> {
@@ -86,7 +106,6 @@ struct EmailValidator: CustomValidation {
             prev.0 == curr.0 && prev.1 == curr.1
         })
         .map { isEmpty, isEmail in
-            print("I got trigged")
             if isEmpty { return .error(.empty) }
             if !isEmail { return .error(.invalidEmail) }
             return .valid
@@ -102,7 +121,7 @@ enum ValidatorFactory {
         case .email:
             return EmailValidator()
         case .phone:
-            return EmailValidator()
+            return PhoneValidator()
         }
     }
 }
