@@ -10,8 +10,8 @@ import FirebaseFirestoreSwift
 
 struct UserPrivate: Identifiable, Codable {
     @DocumentID var id: String? = UUID().uuidString
-    let firstName: String
-    let surName: String
-    let email: String
-    let dateOfBirth: Int64
+    var firstName: String
+    var surname: String
+    var email: String
+    var dateOfBirth: Int64
 }

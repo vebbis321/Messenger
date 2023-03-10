@@ -20,7 +20,7 @@ final class LogInVC: UIViewController {
     private let messengerLogo = UIImageView(frame: .zero)
 
     private var vStack: UIStackView!
-    private let emailNumberTextField = AuthTextField(viewModel: .init(placeholder: "Mobile number or email address", returnKey: .continue, type: .Default))
+    private let emailNumberTextField = AuthTextField(viewModel: .init(placeholder: "Mobile number or email address", returnKey: .continue, type: .Default(.Email)))
     private let passwordTextField = AuthTextField(viewModel: .init(placeholder: "Password", returnKey: .done, type: .Password))
     private lazy var loginBtn = AuthButton(title: "Log In")
     private lazy var forgotPasswordBtn: UIButton = .createTextButton(with: "Forgotten Password?")

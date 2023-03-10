@@ -10,7 +10,7 @@ import UIKit
 final class AddPasswordVC: DefaultCreateAccountVC {
 
     let subLabel = UILabel.createSubLabel(with: "Create a password with at least 6 letters and numbers. It should be something that others can't guess.")
-    let passwordTextField = AuthTextField(viewModel: .init(placeholder: "Password", returnKey: .done, type: .Default))
+    let passwordTextField = AuthTextField(viewModel: .init(placeholder: "Password", returnKey: .done, type: .Password))
     lazy var nextButton = AuthButton(title: "Next")
 
 
@@ -34,6 +34,7 @@ private extension AddPasswordVC {
         passwordTextField.delegate = self
 
         nextButton.addAction(for: .touchUpInside) { [weak self] _ in
+            
             self?.coordinator?.goToAgreeAndCreateAccountVC()
         }
 

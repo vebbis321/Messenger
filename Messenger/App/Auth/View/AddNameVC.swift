@@ -14,8 +14,8 @@ final class AddNameVC: DefaultCreateAccountVC {
 
     let subLabel: UILabel = .createSubLabel(with: "Enter the name you use in real life.") 
     let hStack = UIStackView(frame: .zero)
-    let firstNameTextField = AuthTextField(viewModel: .init(placeholder: "First name", returnKey: .continue, type: .Default))
-    let surnameTextField = AuthTextField(viewModel: .init(placeholder: "Surname", returnKey: .done, type: .Default))
+    let firstNameTextField = AuthTextField(viewModel: .init(placeholder: "First name", returnKey: .continue, type: .Default(.Name)))
+    let surnameTextField = AuthTextField(viewModel: .init(placeholder: "Surname", returnKey: .done, type: .Default(.Name)))
     let nextButton = AuthButton(title: "Next")
 
     private var subscriptions = Set<AnyCancellable>()
@@ -30,7 +30,7 @@ final class AddNameVC: DefaultCreateAccountVC {
     }
 }
 
-// MARK: - Bindings
+// MARK: - Bindings / Action
 private extension AddNameVC {
     private func setUpBindings() {
         firstNameTextField.textField.createBinding(with: viewModel.firstName, storeIn: &subscriptions)
@@ -59,6 +59,18 @@ private extension AddNameVC {
                 }
             }
     }
+
+    private func buttonAction() {
+        if viewModel.nameStatus.value == (.valid, .valid) {
+            // if valid on first press move to next vc
+            coordinator?.user.firstName = viewModel.firstName.value
+            coordinator?.user.surname = viewModel.lastName.value
+            coordinator?.goToAddBirthdayVC()
+        } else if nameSubscription == nil {
+            // ... else start the nameStateObserver
+            startNameStateObserver()
+        }
+    }
 }
 
 // MARK: - Views
@@ -78,15 +90,7 @@ private extension AddNameVC {
 
         // nextBtn
         nextButton.addAction(for: .touchUpInside) { [weak self] _ in
-            guard let self = self else { return }
-
-            if self.viewModel.nameStatus.value == (.valid, .valid) {
-                // if valid on first press move to next vc
-                self.coordinator?.goToAddBirthdayVC()
-            } else if self.nameSubscription == nil {
-                // ... else start the nameStateObserver
-                self.startNameStateObserver()
-            }
+            self?.buttonAction()
         }
 
         contentView.addSubview(subLabel)
@@ -122,8 +126,8 @@ extension AddNameVC: TextFieldDelegate {
             textFieldView.textField.resignFirstResponder()
             surnameTextField.textField.becomeFirstResponder()
         } else {
-            // nextBtn action
-
+            textFieldView.textField.resignFirstResponder()
+            buttonAction()
         }
         return true
     }

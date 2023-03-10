@@ -12,6 +12,7 @@ public protocol CustomTextField: UIView {
     var textField: UITextField { get set }
 }
 
+
 public protocol TextFieldDelegate: AnyObject {
     func textFieldDidBeginEditing(_ customTextField: CustomTextField)
     func textFieldDidEndEditing(_ customTextField: CustomTextField)
@@ -48,6 +49,7 @@ public extension TextFieldDelegate {
 }
 
 
+
 class AuthTextField: UIView, CustomTextField {
 
     // MARK: - Components
@@ -60,7 +62,7 @@ class AuthTextField: UIView, CustomTextField {
         return label
     }()
     private lazy var iconButton: UIButton? = nil
-    private lazy var datePicker: UIDatePicker = {
+    lazy var datePicker: UIDatePicker = {
         let datePicker = UIDatePicker()
         datePicker.preferredDatePickerStyle = .wheels
         datePicker.timeZone = .autoupdatingCurrent
@@ -148,7 +150,7 @@ class AuthTextField: UIView, CustomTextField {
             switch textState {
             case .isEmpty:
                 if errorState != nil {
-                    rightViewButton.updateIcon(newIcon: "exclamationmark.circle", newColor: .red, newWeight: .bold, newSize: 20)
+                    rightViewButton.updateIcon(newIcon: "exclamationmark.circle", newColor: .red, newSize: 20)
                     rightViewButton.isHidden = false
                 } else {
                     rightViewButton.isHidden = true
@@ -183,6 +185,9 @@ class AuthTextField: UIView, CustomTextField {
     private func clearBtnTapped() {
         textField.text = ""
         textState = .isEmpty
+        // for combine
+        NotificationCenter.default.post(
+            name:UITextField.textDidChangeNotification, object: textField)
     }
 
     private func toggleShowHidePasswordBtnTapped() {
@@ -236,7 +241,8 @@ class AuthTextField: UIView, CustomTextField {
             textField.transform = .init(translationX: 0, y: 7.5)
             floatingLabel.font = .systemFont(ofSize: 13, weight: .regular)
             floatingLabel.transform = .init(translationX: 0, y: -(textField.intrinsicContentSize.height * 0.45))
-        default:  break
+        default:
+            break
         }
 
         // defualt
@@ -245,10 +251,10 @@ class AuthTextField: UIView, CustomTextField {
         textField.delegate = self
 
         // custom
-        textField.keyboardType = viewModel.keyboard
+        textField.keyboardType = viewModel.type.keyboard
         textField.returnKeyType = viewModel.returnKey
-        textField.textContentType = viewModel.textContentType
-
+        textField.textContentType = viewModel.type.textContentTypes
+        textField.autocapitalizationType = viewModel.type.autocapitalization
 
         floatingLabel.text = viewModel.placeholder
         floatingLabel.textColor = viewModel.type.floatingLabelColor
@@ -348,7 +354,7 @@ final class TextfieldVC: UIViewController {
     let txtField = AuthTextField(
         viewModel: .init(
             placeholder: "Clear",
-            returnKey: .default, type: .Default))
+            returnKey: .default, type: .Default(.Email)))
     let txtField2 = AuthTextField(
         viewModel: .init(
             placeholder: "Password",

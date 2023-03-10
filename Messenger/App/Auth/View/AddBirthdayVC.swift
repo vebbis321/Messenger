@@ -41,7 +41,10 @@ private extension AddBirthdayVC {
 
         // nextBtn
         nextBtn.addAction(for: .touchUpInside) { [weak self] _ in
-            self?.coordinator?.goToAddEmailVC()
+            guard let self = self else { return }
+            print(self.textFieldView.datePicker.date.localizedDescription)
+            self.coordinator?.user.dateOfBirth = self.textFieldView.datePicker.date.currentTimeMillis()
+            self.coordinator?.goToAddEmailVC()
         }
 
         view.addSubview(tappableSubText)

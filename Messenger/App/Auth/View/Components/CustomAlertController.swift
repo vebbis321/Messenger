@@ -15,8 +15,8 @@ struct AlertButtons {
 
 final class CustomAlertController: UIViewController {
 
-    private var titleLabel = PaddingLabel(withInsets: 8, 8, 0, 0)
-    private let vStack = UIStackView(frame: .zero)
+    private let titleLabel = PaddingLabel(withInsets: 8, 8, 0, 0)
+    private lazy var vStack = UIStackView(frame: .zero)
     private var alertButtons: [AlertButtons]
 
     init(alertTitle: String, alertButtons: [AlertButtons]) {

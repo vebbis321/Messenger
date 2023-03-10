@@ -13,3 +13,10 @@ extension Date {
         return Int64(timeIntervalSince1970 * 1000)
     }
 }
+
+// MARK: - localizedDescription
+extension Date {
+    var localizedDescription: String {
+        return description(with: .current)
+    }
+}

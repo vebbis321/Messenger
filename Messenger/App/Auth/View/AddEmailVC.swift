@@ -10,7 +10,7 @@ import UIKit
 final class AddEmailVC: DefaultCreateAccountVC {
 
     let subLabel: UILabel = .createSubLabel(with: "Enter the address at which you can be contacted. No one will see this on your profile.")
-    let emailTextField = AuthTextField(viewModel: .init(placeholder: "Email address", returnKey: .done, type: .Default))
+    let emailTextField = AuthTextField(viewModel: .init(placeholder: "Email address", returnKey: .done, type: .Default(.Email)))
     let nextButton: UIButton = AuthButton(title: "Next")
 
 
@@ -29,7 +29,9 @@ private extension AddEmailVC {
 
 
         nextButton.addAction(for: .touchUpInside) { [weak self] _ in
-            self?.coordinator?.goToAddPasswordVC()
+            guard let self = self else { return }
+            self.coordinator?.user.email = self.emailTextField.textField.text!
+            self.coordinator?.goToAddPasswordVC()
         }
 
         contentView.addSubview(subLabel)

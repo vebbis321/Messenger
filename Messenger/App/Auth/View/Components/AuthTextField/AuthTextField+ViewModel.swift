@@ -10,10 +10,83 @@ import UIKit
 extension AuthTextField {
     // MARK: - ViewModel
     struct ViewModel {
-        enum TextFieldType {
-            case Default
+        enum TextFieldType: Equatable {
+
+            private var value: String? {
+                return String(describing: self).components(separatedBy: "(").first
+            }
+            static private func == (lhs: TextFieldType, rhs: TextFieldType) -> Bool {
+                lhs.value == rhs.value
+            }
+
+            case Default(DefaultTypes)
             case Password
             case Date
+
+            enum DefaultTypes {
+                case Email
+                case Phone
+                case OTP
+                case Name
+                case Default
+
+            }
+
+            var textContentTypes: UITextContentType? {
+                switch self {
+                case .Default(let childTypes):
+                    switch childTypes {
+                    case .Email:
+                        return .emailAddress
+                    case .Phone:
+                        return .telephoneNumber
+                    case .OTP:
+                        return .oneTimeCode
+                    case .Name:
+                        return .name
+                    case .Default:
+                        return .none
+                    }
+                case .Password:
+                    return .password
+                case .Date:
+                    return .none
+                }
+            }
+
+            var autocapitalization: UITextAutocapitalizationType {
+                switch self {
+                case .Default(let childTypes):
+                    switch childTypes {
+                    case .Name:
+                        return .words
+                    default:
+                        return .none
+                    }
+                default:
+                    return .none
+                }
+            }
+
+            var keyboard: UIKeyboardType {
+                switch self {
+                case .Default(let childtypes):
+                    switch childtypes {
+                    case .Email:
+                        return .emailAddress
+                    case .Phone:
+                        return .phonePad
+                    case .OTP:
+                        return .numberPad
+                    case .Name:
+                        return .default
+                    case .Default:
+                        return .default
+                    }
+                default:
+                    return .default
+                }
+            }
 
             var isSecure: Bool {
                 self == .Password ? true : false
@@ -74,10 +147,10 @@ extension AuthTextField {
         }
 
         let placeholder: String
-        let keyboard: UIKeyboardType = .default
         let returnKey: UIReturnKeyType
-        let textContentType: UITextContentType? = nil
         let type: TextFieldType
+
+
     }
 
 }

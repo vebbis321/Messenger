@@ -13,7 +13,7 @@ final class CreateAccountCoordinator: Coordinator {
 
     var rootViewController: UINavigationController
 
-    var user = UserPrivate(id: nil, firstName: "", surName: "", email: "", dateOfBirth: 0)
+    var user = UserPrivate(id: nil, firstName: "", surname: "", email: "", dateOfBirth: 0)
     var password: String? = nil
 
     init(rootViewController: UINavigationController) {

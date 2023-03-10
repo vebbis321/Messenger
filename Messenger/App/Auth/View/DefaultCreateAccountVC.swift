@@ -11,11 +11,11 @@ class DefaultCreateAccountVC: UIViewController {
 
     weak var coordinator: CreateAccountCoordinator?
 
-    let contentView = UIView(frame: .zero)
-    let scrollView = UIScrollView(frame: .zero)
+    lazy var contentView = UIView(frame: .zero)
+    private lazy var scrollView = UIScrollView(frame: .zero)
 
     private let titleLabel = UILabel(frame: .zero)
-    private let alreadyHaveAnAccountBtn = UIButton(type: .custom)
+    private lazy var alreadyHaveAnAccountBtn = UIButton(type: .custom)
 
     init(titleStr: String) {
         self.titleLabel.text = titleStr
