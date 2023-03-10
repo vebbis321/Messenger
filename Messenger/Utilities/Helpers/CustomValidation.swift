@@ -8,21 +8,20 @@
 import UIKit
 import Combine
 
-protocol GenericStrSubject: Subject where Self.Output == String, Self.Failure == Never { }
-
 protocol CustomValidation {
     func validate(subject: CurrentValueSubject<String, Never>) -> AnyPublisher<ValidationState, Never>
 }
 
 extension CustomValidation {
-    private func defaultTextPublisher(subject: some GenericStrSubject) -> AnyPublisher<String, Never>  {
+    // generic impl...  <S: Subject>(subject: S) -> AnyPublisher<String, Never> where S.Output == String, S.Failure == Never
+    private func defaultTextPublisher(subject: CurrentValueSubject<String, Never>) -> AnyPublisher<String, Never> {
         subject
             .debounce(for: 0.2, scheduler: RunLoop.main)
             .removeDuplicates()
             .eraseToAnyPublisher()
     }
 
-    func isEmpty(with subject: any GenericStrSubject) -> AnyPublisher<Bool, Never> {
+    func isEmpty(with subject: CurrentValueSubject<String, Never>) -> AnyPublisher<Bool, Never> {
         defaultTextPublisher(subject: subject)
             .map {
                return $0.isEmpty
@@ -48,7 +47,7 @@ extension CustomValidation {
             .eraseToAnyPublisher()
     }
 
-    func isEmail<S: Subject>(with subject: S) -> AnyPublisher<Bool, Never> where S.Output == String, S.Failure == Never {
+    func isEmail(with subject: CurrentValueSubject<String, Never>) -> AnyPublisher<Bool, Never> {
        defaultTextPublisher(subject: subject)
             .map {
                 return $0.isValidEmail() }
