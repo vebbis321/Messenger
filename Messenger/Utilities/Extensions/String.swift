@@ -25,6 +25,9 @@ extension String {
         return stringFulfillsRegex(regex: ".*[^A-Za-z0-9].*")
     }
 
+    func isValidEmail() -> Bool {
+        return stringFulfillsRegex(regex: "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}")
+    }
 
     private func stringFulfillsRegex(regex: String) -> Bool {
         let texttest = NSPredicate(format: "SELF MATCHES %@", regex)
