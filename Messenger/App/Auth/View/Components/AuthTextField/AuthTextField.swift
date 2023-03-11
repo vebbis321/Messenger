@@ -77,7 +77,7 @@ class AuthTextField: UIView, CustomTextField {
 
         guard viewModel.type == .Date else {
             print("STARTED \(viewModel.type)")
-            validate()
+            startValidation()
             return
         }
         updateDate()
@@ -94,11 +94,12 @@ class AuthTextField: UIView, CustomTextField {
     // MARK: - Public TextField State
     private var subscriptions = Set<AnyCancellable>()
     var textFieldSubject = CurrentValueSubject<String, Never>("")
-    public func validate() {
+
+    public func startValidation() {
         textField.createBinding(with: textFieldSubject, storeIn: &subscriptions)
-        textField.validateText(validationType: .email, subject: textFieldSubject)
+        textField.validateText(validationType: .password, subject: textFieldSubject)
             .sink { state in
-                print(state, self.viewModel.type)
+                print(state)
             }
             .store(in: &subscriptions)
     }

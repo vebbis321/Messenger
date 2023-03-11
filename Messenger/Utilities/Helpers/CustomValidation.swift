@@ -23,21 +23,25 @@ extension CustomValidation {
 
     func isEmpty(with subject: CurrentValueSubject<String, Never>) -> AnyPublisher<Bool, Never> {
         defaultTextPublisher(subject: subject)
-            .map {
-               return $0.isEmpty
-            }
+            .map { $0.isEmpty }
             .eraseToAnyPublisher()
     }
 
-    func isToShort(with subject: CurrentValueSubject<String, Never>) -> AnyPublisher<Bool, Never> {
+    func isToShort(with subject: CurrentValueSubject<String, Never>, count: Int) -> AnyPublisher<Bool, Never> {
         defaultTextPublisher(subject: subject)
-            .map { !($0.count >= 2) }
+            .map { !($0.count >= count) }
             .eraseToAnyPublisher()
     }
 
     func hasNumbers(with subject: CurrentValueSubject<String, Never>) -> AnyPublisher<Bool, Never> {
         defaultTextPublisher(subject: subject)
             .map { $0.hasNumbers() }
+            .eraseToAnyPublisher()
+    }
+
+    func hasLetters(with subject: CurrentValueSubject<String, Never>) -> AnyPublisher<Bool, Never> {
+        defaultTextPublisher(subject: subject)
+            .map { $0.contains(where: { $0.isLetter }) }
             .eraseToAnyPublisher()
     }
 
@@ -49,8 +53,13 @@ extension CustomValidation {
 
     func isEmail(with subject: CurrentValueSubject<String, Never>) -> AnyPublisher<Bool, Never> {
        defaultTextPublisher(subject: subject)
-            .map {
-                return $0.isValidEmail() }
+            .map { $0.isValidEmail() }
+            .eraseToAnyPublisher()
+    }
+
+    func isPhoneNumber(with subject: CurrentValueSubject<String, Never>) -> AnyPublisher<Bool, Never> {
+        defaultTextPublisher(subject: subject)
+            .map { $0.isPhoneNumValid() }
             .eraseToAnyPublisher()
     }
 }
@@ -58,6 +67,7 @@ extension CustomValidation {
 enum ValidatorType  {
     case email
     case phone
+    case password
 }
 
 enum ValidationState {
@@ -67,14 +77,36 @@ enum ValidationState {
     enum ErrorState: String {
         case empty
         case invalidEmail
+        case invalidPhoneNum
+        case toShortPassword
+        case passwordNeedsNum
+        case passwordNeedsLetters
+
+        var description: String {
+            switch self {
+            case .empty:
+                return "Textfield is empty"
+            case .invalidEmail:
+                return "Invalid email"
+            case .invalidPhoneNum:
+                return "Invalid phone number"
+            case .toShortPassword:
+                return "Your password is to short"
+            case .passwordNeedsNum:
+                return "Your password doesn't contain any numbers"
+            case .passwordNeedsLetters:
+                return "Your password doesn't contain any letters"
+            }
+        }
     }
+
 }
 
 struct EmailValidator: CustomValidation {
 
-    func validate<S: Subject>(
-        subject: S
-    ) -> AnyPublisher<ValidationState, Never> where S.Output == String, S.Failure == Never {
+    func validate(
+        subject: CurrentValueSubject<String, Never>
+    ) -> AnyPublisher<ValidationState, Never>{
         Publishers.CombineLatest(
             isEmpty(with: subject),
             isEmail(with: subject)
@@ -99,18 +131,42 @@ struct PhoneValidator: CustomValidation {
     ) -> AnyPublisher<ValidationState, Never> {
         Publishers.CombineLatest(
             isEmpty(with: subject),
-            isEmail(with: subject)
+            isPhoneNumber(with: subject)
         )
         .removeDuplicates(by: { prev, curr in
             prev.0 == curr.0 && prev.1 == curr.1
         })
-        .map { isEmpty, isEmail in
+        .map { isEmpty, isPhoneNum in
             if isEmpty { return .error(.empty) }
-            if !isEmail { return .error(.invalidEmail) }
+            if !isPhoneNum { return .error(.invalidPhoneNum) }
             return .valid
         }
         .eraseToAnyPublisher()
 
+    }
+}
+
+struct PasswordValidator: CustomValidation {
+    func validate(
+        subject: CurrentValueSubject<String, Never>
+    ) -> AnyPublisher<ValidationState, Never> {
+        Publishers.CombineLatest4(
+            isEmpty(with: subject),
+            isToShort(with: subject, count: 6),
+            hasNumbers(with: subject),
+            hasLetters(with: subject)
+        )
+        .removeDuplicates(by: { prev, curr in
+            prev.0 == curr.0 && prev.1 == curr.1 && prev.2 == curr.2 && prev.3 == curr.3
+        })
+        .map { isEmpty, toShort, hasNumbers, hasLetters in
+            if isEmpty { return .error(.empty) }
+            if toShort { return .error(.toShortPassword) }
+            if !hasNumbers { return .error(.passwordNeedsNum) }
+            if !hasLetters { return .error(.passwordNeedsLetters) }
+            return .valid
+        }
+        .eraseToAnyPublisher()
     }
 }
 
@@ -121,6 +177,8 @@ enum ValidatorFactory {
             return EmailValidator()
         case .phone:
             return PhoneValidator()
+        case .password:
+            return PasswordValidator()
         }
     }
 }

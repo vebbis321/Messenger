@@ -29,6 +29,10 @@ extension String {
         return stringFulfillsRegex(regex: "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}")
     }
 
+    func isPhoneNumValid() -> Bool {
+        return stringFulfillsRegex(regex: "^[0-9+]{0,1}+[0-9]{5,16}$")
+    }
+
     private func stringFulfillsRegex(regex: String) -> Bool {
         let texttest = NSPredicate(format: "SELF MATCHES %@", regex)
         guard texttest.evaluate(with: self) else {
