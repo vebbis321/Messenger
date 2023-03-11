@@ -12,6 +12,29 @@ extension AuthTextField {
     struct ViewModel {
         enum TextFieldType: Equatable {
 
+            var validatorType: ValidatorType? {
+                switch self {
+                case .Default(let defaultType):
+                    switch defaultType {
+                    case .Email:
+                        return .email
+                    case .Phone:
+                        return .phone
+                    case .OTP:
+                        return .none
+                    case .Name:
+                        return .none
+                    case .Default:
+                        return .none
+                    }
+                case .Password:
+                    return .password
+                case .Date:
+                    return nil
+                }
+            }
+
+
             private var value: String? {
                 return String(describing: self).components(separatedBy: "(").first
             }
@@ -29,7 +52,6 @@ extension AuthTextField {
                 case OTP
                 case Name
                 case Default
-
             }
 
             var textContentTypes: UITextContentType? {
@@ -149,8 +171,5 @@ extension AuthTextField {
         let placeholder: String
         let returnKey: UIReturnKeyType
         let type: TextFieldType
-
-
     }
-
 }

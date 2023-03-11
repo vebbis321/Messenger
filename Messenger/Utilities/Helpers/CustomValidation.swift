@@ -70,7 +70,7 @@ enum ValidatorType  {
     case password
 }
 
-enum ValidationState {
+enum ValidationState: Equatable {
     case error(ErrorState)
     case valid
 
@@ -164,6 +164,30 @@ struct PasswordValidator: CustomValidation {
             if toShort { return .error(.toShortPassword) }
             if !hasNumbers { return .error(.passwordNeedsNum) }
             if !hasLetters { return .error(.passwordNeedsLetters) }
+            return .valid
+        }
+        .eraseToAnyPublisher()
+    }
+}
+
+struct NameValidator: CustomValidation {
+    func validate(
+        subject: CurrentValueSubject<String, Never>
+    ) -> AnyPublisher<ValidationState, Never> {
+        Publishers.CombineLatest4(
+            isEmpty(with: subject),
+            isToShort(with: subject, count: 2),
+            hasNumbers(with: subject),
+            hasSpecialChars(with: subject)
+        )
+        .removeDuplicates(by: { prev, curr in
+            prev.0 == curr.0 && prev.1 == curr.1 && prev.2 == curr.2 && prev.3 == curr.3
+        })
+        .map { isEmpty, toShort, hasNumbers, hasSpecialChars in
+            if isEmpty { return .error(.empty) }
+            if toShort { return .error(.toShortPassword) }
+            if hasNumbers { return .error(.passwordNeedsNum) }
+            if hasSpecialChars { return .error(.passwordNeedsLetters) }
             return .valid
         }
         .eraseToAnyPublisher()

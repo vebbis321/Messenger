@@ -96,12 +96,25 @@ class AuthTextField: UIView, CustomTextField {
     var textFieldSubject = CurrentValueSubject<String, Never>("")
 
     public func startValidation() {
-        textField.createBinding(with: textFieldSubject, storeIn: &subscriptions)
-        textField.validateText(validationType: .password, subject: textFieldSubject)
-            .sink { state in
-                print(state)
+        guard let validatorType = viewModel.type.validatorType else { return }
+        textField.createBinding(
+            with: textFieldSubject,
+            storeIn: &subscriptions
+        )
+        textField.validateText(
+            validationType: validatorType,
+            subject: textFieldSubject
+        )
+        .sink { [weak self] state in
+            self?.errorState = (state == .valid) ? .none : .error
+            switch state {
+            case .error(let err):
+                print(err.description)
+            case .valid:
+                break
             }
-            .store(in: &subscriptions)
+        }
+        .store(in: &subscriptions)
     }
 
     public var errorState: ErrorState? {
