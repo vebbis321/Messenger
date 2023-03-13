@@ -57,6 +57,7 @@ private extension AddNameVC {
         // hStack
         hStack.axis = .horizontal
         hStack.distribution = .fillEqually
+        hStack.alignment = .top
         hStack.spacing = 10
         hStack.addArrangedSubview(firstNameTextField)
         hStack.addArrangedSubview(surnameTextField)

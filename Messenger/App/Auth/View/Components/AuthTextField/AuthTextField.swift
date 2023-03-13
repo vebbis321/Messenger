@@ -8,7 +8,7 @@
 import UIKit
 import Combine
 
-public protocol CustomTextField: UIStackView {
+public protocol CustomTextField: UIView {
     var textField: UITextField { get set }
 }
 
@@ -48,7 +48,7 @@ public extension TextFieldDelegate {
 }
 
 
-class AuthTextField: UIStackView, CustomTextField {
+class AuthTextField: UIView, CustomTextField {
 
     // MARK: - Components
     lazy var textField: UITextField = {
@@ -97,7 +97,7 @@ class AuthTextField: UIStackView, CustomTextField {
     private var viewModel: ViewModel
     private let padding: CGFloat = 15
     private var txtFieldRightAnchorConstraint: NSLayoutConstraint!
-
+    private var dynamicErrorLabelTopConstraint: NSLayoutConstraint!
 
     // MARK: - Delegate
     weak var delegate: TextFieldDelegate?
@@ -166,8 +166,10 @@ class AuthTextField: UIStackView, CustomTextField {
     private func showErrorLabel() {
         guard errorLabel.isHidden == true else { return }
         UIView.transition(with: errorLabel, duration: 0.25, options: .curveEaseIn) { [weak self] in
-            self?.errorLabel.isHidden = false
-            self?.layoutIfNeeded()
+            guard let self = self else { return }
+            self.dynamicErrorLabelTopConstraint.constant = 10
+            self.errorLabel.isHidden = false
+            self.layoutIfNeeded()
         } completion: { [weak self] _ in
             self?.errorLabel.alpha = 1
         }
@@ -176,7 +178,9 @@ class AuthTextField: UIStackView, CustomTextField {
 
     private func hideErrorLabel() {
         defaultAnimation { [weak self] in
+            self?.dynamicErrorLabelTopConstraint.constant = 0
             self?.errorLabel.isHidden = true
+            self?.errorLabel.alpha = 0
             self?.layoutIfNeeded()
         }
     }
@@ -293,9 +297,8 @@ class AuthTextField: UIStackView, CustomTextField {
 
     // MARK: - setup
     private func setup() {
+
         // self
-        axis = .vertical
-        spacing = 10
 
         // textFieldView
         let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
@@ -335,24 +338,35 @@ class AuthTextField: UIStackView, CustomTextField {
 
         textFieldView.addSubview(textField)
         textFieldView.addSubview(floatingLabel)
-        addArrangedSubview(textFieldView)
-        addArrangedSubview(errorLabel)
+        addSubview(textFieldView)
+        addSubview(errorLabel)
+
+        // self
+        translatesAutoresizingMaskIntoConstraints = false
+
+        // textFieldView
+        textFieldView.translatesAutoresizingMaskIntoConstraints = false
+        textFieldView.widthAnchor.constraint(equalTo: widthAnchor).isActive = true
+        textFieldView.topAnchor.constraint(equalTo: topAnchor).isActive = true
 
         textField.translatesAutoresizingMaskIntoConstraints = false
+        textField.topAnchor.constraint(equalTo: textFieldView.topAnchor, constant: 20).isActive = true
         textField.leftAnchor.constraint(equalTo: textFieldView.leftAnchor, constant: padding).isActive = true
-        textField.centerYAnchor.constraint(equalTo: textFieldView.centerYAnchor).isActive = true
         txtFieldRightAnchorConstraint = textField.rightAnchor.constraint(equalTo: textFieldView.rightAnchor, constant: -padding)
         txtFieldRightAnchorConstraint.isActive = true
 
         // floatingLabel
         floatingLabel.translatesAutoresizingMaskIntoConstraints = false
         floatingLabel.centerYAnchor.constraint(equalTo: textFieldView.centerYAnchor).isActive = true
-        floatingLabel.pinSides(to: self, padding: padding)
+        floatingLabel.pinSides(to: textFieldView, padding: padding)
 
-        // textFieldView
-        textFieldView.translatesAutoresizingMaskIntoConstraints = false
-        textFieldView.topAnchor.constraint(equalTo: textField.topAnchor, constant: -20).isActive = true
         textFieldView.bottomAnchor.constraint(equalTo: textField.bottomAnchor, constant: 20).isActive = true
+
+        errorLabel.translatesAutoresizingMaskIntoConstraints = false
+        dynamicErrorLabelTopConstraint = errorLabel.topAnchor.constraint(equalTo: textFieldView.bottomAnchor, constant: 0)
+        dynamicErrorLabelTopConstraint.isActive = true
+        errorLabel.pinSides(to: self)
+        errorLabel.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
 
         // Add rightView if rightView is not nil
         guard let iconBtnConf = viewModel.type.iconButton else { return }
