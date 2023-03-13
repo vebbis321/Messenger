@@ -23,7 +23,7 @@ extension AuthTextField {
                     case .OTP:
                         return .none
                     case .Name:
-                        return .none
+                        return .name
                     case .Default:
                         return .none
                     }

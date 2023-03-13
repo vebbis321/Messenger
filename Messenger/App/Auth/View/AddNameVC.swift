@@ -10,66 +10,39 @@ import Combine
 
 final class AddNameVC: DefaultCreateAccountVC {
 
-    let viewModel = AddNameVM()
-
     let subLabel: UILabel = .createSubLabel(with: "Enter the name you use in real life.") 
     let hStack = UIStackView(frame: .zero)
     let firstNameTextField = AuthTextField(viewModel: .init(placeholder: "First name", returnKey: .continue, type: .Default(.Name)))
     let surnameTextField = AuthTextField(viewModel: .init(placeholder: "Surname", returnKey: .done, type: .Default(.Name)))
     let nextButton = AuthButton(title: "Next")
 
-    private var subscriptions = Set<AnyCancellable>()
-    private var nameSubscription: AnyCancellable?
-
     override func viewDidLoad() {
         super.viewDidLoad()
         hideKeyboardWhenTappedAround()
         setUpViews()
         setUpConstraints()
-        setUpBindings()
+
     }
 }
 
 // MARK: - Bindings / Action
 private extension AddNameVC {
-    private func setUpBindings() {
-        firstNameTextField.textField.createBinding(with: viewModel.firstName, storeIn: &subscriptions)
-        surnameTextField.textField.createBinding(with: viewModel.lastName, storeIn: &subscriptions)
-    }
-
-    private func startNameStateObserver() {
-        nameSubscription = viewModel
-            .nameStatus
-            .removeDuplicates(by: { prev, curr in
-                prev.0 == curr.0 && prev.1 == curr.1
-            })
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] (firstNameStatus, surnameStatus) in
-                print(firstNameStatus, surnameStatus)
-                if firstNameStatus != .valid {
-                    self?.firstNameTextField.errorState = .error
-                } else {
-                    self?.firstNameTextField.errorState = nil
-                }
-
-                if surnameStatus != .valid {
-                    self?.surnameTextField.errorState = .error
-                } else {
-                    self?.surnameTextField.errorState = nil
-                }
-            }
-    }
 
     private func buttonAction() {
-        if viewModel.nameStatus.value == (.valid, .valid) {
+        print("JE")
+        if firstNameTextField.validationSubject.value == .valid &&
+            surnameTextField.validationSubject.value == .valid {
+            print("JE2")
             // if valid on first press move to next vc
-            coordinator?.user.firstName = viewModel.firstName.value
-            coordinator?.user.surname = viewModel.lastName.value
+            coordinator?.user.firstName = firstNameTextField.textFieldSubject.value
+            coordinator?.user.surname = surnameTextField.textFieldSubject.value
             coordinator?.goToAddBirthdayVC()
-        } else if nameSubscription == nil {
-            // ... else start the nameStateObserver
-            startNameStateObserver()
+        } else {
+            print("JE3")
+            firstNameTextField.startValidation()
+            surnameTextField.startValidation()
         }
+
     }
 }
 

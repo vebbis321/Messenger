@@ -68,9 +68,11 @@ enum ValidatorType  {
     case email
     case phone
     case password
+    case name
 }
 
 enum ValidationState: Equatable {
+    case idle
     case error(ErrorState)
     case valid
 
@@ -81,21 +83,24 @@ enum ValidationState: Equatable {
         case toShortPassword
         case passwordNeedsNum
         case passwordNeedsLetters
+        case nameCantHaveNumOrSpecialChars
 
         var description: String {
             switch self {
             case .empty:
-                return "Textfield is empty"
+                return "Field is empty."
             case .invalidEmail:
-                return "Invalid email"
+                return "Invalid email."
             case .invalidPhoneNum:
-                return "Invalid phone number"
+                return "Invalid phone number."
             case .toShortPassword:
-                return "Your password is to short"
+                return "Your password is to short."
             case .passwordNeedsNum:
-                return "Your password doesn't contain any numbers"
+                return "Your password doesn't contain any numbers."
             case .passwordNeedsLetters:
-                return "Your password doesn't contain any letters"
+                return "Your password doesn't contain any letters."
+            case .nameCantHaveNumOrSpecialChars:
+                return "Name can't contain numbers or special characters."
             }
         }
     }
@@ -186,8 +191,7 @@ struct NameValidator: CustomValidation {
         .map { isEmpty, toShort, hasNumbers, hasSpecialChars in
             if isEmpty { return .error(.empty) }
             if toShort { return .error(.toShortPassword) }
-            if hasNumbers { return .error(.passwordNeedsNum) }
-            if hasSpecialChars { return .error(.passwordNeedsLetters) }
+            if hasNumbers || hasSpecialChars { return .error(.nameCantHaveNumOrSpecialChars) }
             return .valid
         }
         .eraseToAnyPublisher()
@@ -203,6 +207,8 @@ enum ValidatorFactory {
             return PhoneValidator()
         case .password:
             return PasswordValidator()
+        case .name:
+            return NameValidator()
         }
     }
 }

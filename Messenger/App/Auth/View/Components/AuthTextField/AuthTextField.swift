@@ -8,10 +8,9 @@
 import UIKit
 import Combine
 
-public protocol CustomTextField: UIView {
+public protocol CustomTextField: UIStackView {
     var textField: UITextField { get set }
 }
-
 
 public protocol TextFieldDelegate: AnyObject {
     func textFieldDidBeginEditing(_ customTextField: CustomTextField)
@@ -49,12 +48,13 @@ public extension TextFieldDelegate {
 }
 
 
-class AuthTextField: UIView, CustomTextField {
+class AuthTextField: UIStackView, CustomTextField {
 
     // MARK: - Components
     lazy var textField: UITextField = {
         return viewModel.type.textFieldType
     }()
+    private let textFieldView = UIView(frame: .zero)
     private lazy var floatingLabel: UILabel = {
         let label = UILabel(frame: .zero)
         label.font = .systemFont(ofSize: 17, weight: .regular)
@@ -71,15 +71,25 @@ class AuthTextField: UIView, CustomTextField {
         return datePicker
     }()
 
+    private lazy var errorLabel: UILabel = {
+        let label = UILabel(frame: .zero)
+        label.numberOfLines = 0
+        label.textAlignment = .left
+        label.textColor = .red
+        label.isHidden = true
+        label.alpha = 0
+        label.font = .preferredFont(forTextStyle: .footnote)
+        return label
+    }()
+
     // MARK: - override
     override func didMoveToWindow() {
         // similar to viewWillAppear
-
-        guard viewModel.type == .Date else {
-            print("STARTED \(viewModel.type)")
-            startValidation()
-            return
-        }
+        textField.createBinding(
+            with: textFieldSubject,
+            storeIn: &subscriptions
+        )
+        guard viewModel.type == .Date else { return }
         updateDate()
     }
 
@@ -88,37 +98,19 @@ class AuthTextField: UIView, CustomTextField {
     private let padding: CGFloat = 15
     private var txtFieldRightAnchorConstraint: NSLayoutConstraint!
 
+
     // MARK: - Delegate
     weak var delegate: TextFieldDelegate?
 
-    // MARK: - Public TextField State
-    private var subscriptions = Set<AnyCancellable>()
-    var textFieldSubject = CurrentValueSubject<String, Never>("")
 
-    public func startValidation() {
-        guard let validatorType = viewModel.type.validatorType else { return }
-        textField.createBinding(
-            with: textFieldSubject,
-            storeIn: &subscriptions
-        )
-        textField.validateText(
-            validationType: validatorType,
-            subject: textFieldSubject
-        )
-        .sink { [weak self] state in
-            self?.errorState = (state == .valid) ? .none : .error
-            switch state {
-            case .error(let err):
-                print(err.description)
-            case .valid:
-                break
-            }
-        }
-        .store(in: &subscriptions)
-    }
+    // MARK: - Combine
+    private var subscriptions = Set<AnyCancellable>()
+    public var textFieldSubject = CurrentValueSubject<String, Never>("")
+    public var validationSubject = CurrentValueSubject<ValidationState, Never>(.idle)
 
     public var errorState: ErrorState? {
         didSet {
+            print("Error")
             evaluateErrorState()
             evaluateButtonState()
         }
@@ -140,7 +132,55 @@ class AuthTextField: UIView, CustomTextField {
         }
     }
 
+    // MARK: - Public Methods
+    public func startValidation() {
+
+        guard validationSubject.value == .idle else { return }
+        guard let validatorType = viewModel.type.validatorType else { return }
+
+        textField.validateText(
+            validationType: validatorType,
+            subject: textFieldSubject
+        )
+        .assign(to: \.validationSubject.value, on: self)
+        .store(in: &subscriptions)
+
+        validationSubject
+            .sink { [weak self] state in
+                switch state {
+                case .idle:
+                    break
+                case .error(let errType):
+                    self?.showErrorLabel()
+                    self?.errorState = .error
+                    self?.errorLabel.text = errType.description
+                case .valid:
+                    self?.hideErrorLabel()
+                    self?.errorState = nil
+                }
+
+            }.store(in: &subscriptions)
+    }
+
     // MARK: - Private Methods
+    private func showErrorLabel() {
+        guard errorLabel.isHidden == true else { return }
+        UIView.transition(with: errorLabel, duration: 0.25, options: .curveEaseIn) { [weak self] in
+            self?.errorLabel.isHidden = false
+            self?.layoutIfNeeded()
+        } completion: { [weak self] _ in
+            self?.errorLabel.alpha = 1
+        }
+
+    }
+
+    private func hideErrorLabel() {
+        defaultAnimation { [weak self] in
+            self?.errorLabel.isHidden = true
+            self?.layoutIfNeeded()
+        }
+    }
+
     private func evaluateIsTextEmptyState() {
         // so we don't set the properties of textField if its already set
         guard textField.transform != textState.textFieldScale else { return }
@@ -155,19 +195,19 @@ class AuthTextField: UIView, CustomTextField {
 
     private func evaluateTextFocusState() {
         guard errorState != .error else { return }
-        layer.borderColor = focusState.borderColor
+        textFieldView.layer.borderColor = focusState.borderColor
     }
 
     private func evaluateErrorState() {
         switch errorState {
         case .none:
             floatingLabel.textColor = textState.floatingLabelColor
-            layer.borderColor = focusState.borderColor
+            textFieldView.layer.borderColor = focusState.borderColor
             iconButton?.updateIcon(newIcon: "xmark", newColor: .theme.tintColor)
 
         case .some(let state):
             floatingLabel.textColor = state.floatingLabelColor
-            layer.borderColor = state.borderColor
+            textFieldView.layer.borderColor = state.borderColor
         }
 
     }
@@ -200,7 +240,6 @@ class AuthTextField: UIView, CustomTextField {
         case .Date: break
         }
     }
-
 
     // MARK: - Actions
     @objc private func handleTap() {
@@ -248,21 +287,24 @@ class AuthTextField: UIView, CustomTextField {
 
     }
 
-    required init?(coder: NSCoder) {
+    required init(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
 
     // MARK: - setup
     private func setup() {
         // self
+        axis = .vertical
+        spacing = 10
+
+        // textFieldView
         let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
-        addGestureRecognizer(tap)
-        backgroundColor = .white
-        layer.borderWidth = 1
-        layer.masksToBounds = true
-        layer.cornerRadius = 3
-        layer.borderColor = UIColor.theme.border?.cgColor
+        textFieldView.addGestureRecognizer(tap)
+        textFieldView.backgroundColor = .white
+        textFieldView.layer.borderWidth = 1
+        textFieldView.layer.masksToBounds = true
+        textFieldView.layer.cornerRadius = 3
+        textFieldView.layer.borderColor = UIColor.theme.border?.cgColor
 
         switch viewModel.type {
         case .Date:
@@ -291,27 +333,26 @@ class AuthTextField: UIView, CustomTextField {
         textField.isSecureTextEntry = viewModel.type.isSecure
         textField.tintColor = viewModel.type.tintColor
 
+        textFieldView.addSubview(textField)
+        textFieldView.addSubview(floatingLabel)
+        addArrangedSubview(textFieldView)
+        addArrangedSubview(errorLabel)
 
-        addSubview(textField)
-        addSubview(floatingLabel)
-
-        // textField
         textField.translatesAutoresizingMaskIntoConstraints = false
-        textField.leftAnchor.constraint(equalTo: leftAnchor, constant: padding).isActive = true
-        textField.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
-        txtFieldRightAnchorConstraint = textField.rightAnchor.constraint(equalTo: rightAnchor, constant: -padding)
+        textField.leftAnchor.constraint(equalTo: textFieldView.leftAnchor, constant: padding).isActive = true
+        textField.centerYAnchor.constraint(equalTo: textFieldView.centerYAnchor).isActive = true
+        txtFieldRightAnchorConstraint = textField.rightAnchor.constraint(equalTo: textFieldView.rightAnchor, constant: -padding)
         txtFieldRightAnchorConstraint.isActive = true
-
 
         // floatingLabel
         floatingLabel.translatesAutoresizingMaskIntoConstraints = false
-        floatingLabel.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
+        floatingLabel.centerYAnchor.constraint(equalTo: textFieldView.centerYAnchor).isActive = true
         floatingLabel.pinSides(to: self, padding: padding)
 
-        // self
-        translatesAutoresizingMaskIntoConstraints = false
-        topAnchor.constraint(equalTo: textField.topAnchor, constant: -20).isActive = true
-        bottomAnchor.constraint(equalTo: textField.bottomAnchor, constant: 20).isActive = true
+        // textFieldView
+        textFieldView.translatesAutoresizingMaskIntoConstraints = false
+        textFieldView.topAnchor.constraint(equalTo: textField.topAnchor, constant: -20).isActive = true
+        textFieldView.bottomAnchor.constraint(equalTo: textField.bottomAnchor, constant: 20).isActive = true
 
         // Add rightView if rightView is not nil
         guard let iconBtnConf = viewModel.type.iconButton else { return }
@@ -334,7 +375,7 @@ class AuthTextField: UIView, CustomTextField {
         addSubview(iconBtn)
         iconBtn.translatesAutoresizingMaskIntoConstraints = false
         iconBtn.rightAnchor.constraint(equalTo: rightAnchor, constant: -15).isActive = true
-        iconBtn.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
+        iconBtn.centerYAnchor.constraint(equalTo: textFieldView.centerYAnchor).isActive = true
         txtFieldRightAnchorConstraint.constant = -(30 + iconBtn.intrinsicContentSize.width)
         layoutIfNeeded()
 
@@ -375,9 +416,6 @@ extension AuthTextField: UITextFieldDelegate {
 }
 
 
-
-
-
 // MARK: - Test VC
 final class TextfieldVC: UIViewController {
     let txtField = AuthTextField(
@@ -402,13 +440,15 @@ final class TextfieldVC: UIViewController {
         view.addSubview(txtField2)
         view.addSubview(txtField3)
 
-
+        txtField.translatesAutoresizingMaskIntoConstraints = false
         txtField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
         txtField.pinSides(to: view, padding: 20)
 
+        txtField2.translatesAutoresizingMaskIntoConstraints = false
         txtField2.topAnchor.constraint(equalTo: txtField.bottomAnchor, constant: 10).isActive = true
         txtField2.pinSides(to: view, padding: 20)
 
+        txtField3.translatesAutoresizingMaskIntoConstraints = false
         txtField3.topAnchor.constraint(equalTo: txtField2.bottomAnchor, constant: 10).isActive = true
         txtField3.pinSides(to: view, padding: 20)
 
@@ -419,10 +459,7 @@ final class TextfieldVC: UIViewController {
 
 //        txtField.errorState = .error
         DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
-            self.txtField.errorState = .error
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
-                self.txtField.errorState = nil
-            }
+            self.txtField.startValidation()
         }
     }
 }
