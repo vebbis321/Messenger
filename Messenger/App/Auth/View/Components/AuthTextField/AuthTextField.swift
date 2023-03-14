@@ -50,17 +50,42 @@ public extension TextFieldDelegate {
 
 class AuthTextField: UIView, CustomTextField {
 
-    // MARK: - Components
-    lazy var textField: UITextField = {
-        return viewModel.type.textFieldType
-    }()
-    private let textFieldView = UIView(frame: .zero)
     private lazy var floatingLabel: UILabel = {
         let label = UILabel(frame: .zero)
         label.font = .systemFont(ofSize: 17, weight: .regular)
         return label
     }()
+
+    // MARK: - Components
+    lazy var textField: UITextField = {
+        return viewModel.type.textFieldType
+    }()
+
     private lazy var iconButton: UIButton? = nil
+
+    private lazy var textFieldView: UIView = {
+        let view = UIView(frame: .zero)
+        let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
+        view.addGestureRecognizer(tap)
+        view.backgroundColor = .white
+        view.layer.borderWidth = 1
+        view.layer.masksToBounds = true
+        view.layer.cornerRadius = 3
+        view.layer.borderColor = UIColor.theme.border?.cgColor
+        return view
+    }()
+
+    private lazy var hStack: UIStackView = {
+        let stack = UIStackView(frame: .zero)
+        stack.alignment = .leading
+        stack.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        stack.axis = .horizontal
+        stack.spacing = 10
+        stack.isLayoutMarginsRelativeArrangement = true
+        stack.directionalLayoutMargins = .init(top: 20, leading: 20, bottom: 20, trailing: 20)
+        return stack
+    }()
+
     lazy var datePicker: UIDatePicker = {
         let datePicker = UIDatePicker()
         datePicker.preferredDatePickerStyle = .wheels
@@ -76,10 +101,17 @@ class AuthTextField: UIView, CustomTextField {
         label.numberOfLines = 0
         label.textAlignment = .left
         label.textColor = .red
-        label.isHidden = true
         label.alpha = 0
         label.font = .preferredFont(forTextStyle: .footnote)
+        label.isHidden = true
         return label
+    }()
+
+    private lazy var expandingVstack: UIStackView = {
+        let stack = UIStackView(frame: .zero)
+        stack.axis = .vertical
+        stack.spacing = 10
+        return stack
     }()
 
     // MARK: - override
@@ -96,8 +128,6 @@ class AuthTextField: UIView, CustomTextField {
     // MARK: - Private Properties
     private var viewModel: ViewModel
     private let padding: CGFloat = 15
-    private var txtFieldRightAnchorConstraint: NSLayoutConstraint!
-    private var dynamicErrorLabelTopConstraint: NSLayoutConstraint!
 
     // MARK: - Delegate
     weak var delegate: TextFieldDelegate?
@@ -167,28 +197,26 @@ class AuthTextField: UIView, CustomTextField {
         guard errorLabel.isHidden == true else { return }
         UIView.transition(with: errorLabel, duration: 0.25, options: .curveEaseIn) { [weak self] in
             guard let self = self else { return }
-            self.dynamicErrorLabelTopConstraint.constant = 10
             self.errorLabel.isHidden = false
+            self.errorLabel.alpha = 1
             self.layoutIfNeeded()
-        } completion: { [weak self] _ in
-            self?.errorLabel.alpha = 1
         }
 
     }
 
     private func hideErrorLabel() {
-        defaultAnimation { [weak self] in
-            self?.dynamicErrorLabelTopConstraint.constant = 0
-            self?.errorLabel.isHidden = true
-            self?.errorLabel.alpha = 0
-            self?.layoutIfNeeded()
+        UIView.transition(with: errorLabel, duration: 0.25, options: .curveEaseIn) { [weak self] in
+            guard let self = self else { return }
+            self.errorLabel.alpha = 0
+            self.errorLabel.isHidden = true
+            self.layoutIfNeeded()
         }
     }
 
     private func evaluateIsTextEmptyState() {
         // so we don't set the properties of textField if its already set
         guard textField.transform != textState.textFieldScale else { return }
-        floatingLabel.transform = textState == .isEmpty ? .identity : .init(translationX: 0, y: -(textField.intrinsicContentSize.height * 0.45))
+        floatingLabel.transform = textState == .isEmpty ? .identity : .init(translationX: 0, y: -((textField.intrinsicContentSize.height * 0.5) + 5))
         floatingLabel.font = textState.floatingLabelFont
         textField.transform = textState.textFieldScale
         floatingLabel.textColor = textState.floatingLabelColor
@@ -297,24 +325,12 @@ class AuthTextField: UIView, CustomTextField {
 
     // MARK: - setup
     private func setup() {
-
-        // self
-
-        // textFieldView
-        let tap = UITapGestureRecognizer(target: self, action: #selector(handleTap))
-        textFieldView.addGestureRecognizer(tap)
-        textFieldView.backgroundColor = .white
-        textFieldView.layer.borderWidth = 1
-        textFieldView.layer.masksToBounds = true
-        textFieldView.layer.cornerRadius = 3
-        textFieldView.layer.borderColor = UIColor.theme.border?.cgColor
-
         switch viewModel.type {
         case .Date:
             textField.inputView = datePicker
             textField.transform = .init(translationX: 0, y: 7.5)
             floatingLabel.font = .systemFont(ofSize: 13, weight: .regular)
-            floatingLabel.transform = .init(translationX: 0, y: -(textField.intrinsicContentSize.height * 0.45))
+            floatingLabel.transform = .init(translationX: 0, y: -((textField.intrinsicContentSize.height * 0.5) + 5))
         default:
             break
         }
@@ -336,37 +352,42 @@ class AuthTextField: UIView, CustomTextField {
         textField.isSecureTextEntry = viewModel.type.isSecure
         textField.tintColor = viewModel.type.tintColor
 
-        textFieldView.addSubview(textField)
-        textFieldView.addSubview(floatingLabel)
+        textField.addSubview(floatingLabel)
+        hStack.addArrangedSubview(textField)
+        textFieldView.addSubview(hStack)
+
         addSubview(textFieldView)
-        addSubview(errorLabel)
+        addSubview(expandingVstack)
+
+        expandingVstack.addArrangedSubview(textFieldView)
+        expandingVstack.addArrangedSubview(errorLabel)
 
         // self
         translatesAutoresizingMaskIntoConstraints = false
 
+        // hStack
+        hStack.pin(to: textFieldView)
+
         // textFieldView
         textFieldView.translatesAutoresizingMaskIntoConstraints = false
         textFieldView.widthAnchor.constraint(equalTo: widthAnchor).isActive = true
-        textFieldView.topAnchor.constraint(equalTo: topAnchor).isActive = true
-
-        textField.translatesAutoresizingMaskIntoConstraints = false
-        textField.topAnchor.constraint(equalTo: textFieldView.topAnchor, constant: 20).isActive = true
-        textField.leftAnchor.constraint(equalTo: textFieldView.leftAnchor, constant: padding).isActive = true
-        txtFieldRightAnchorConstraint = textField.rightAnchor.constraint(equalTo: textFieldView.rightAnchor, constant: -padding)
-        txtFieldRightAnchorConstraint.isActive = true
 
         // floatingLabel
         floatingLabel.translatesAutoresizingMaskIntoConstraints = false
-        floatingLabel.centerYAnchor.constraint(equalTo: textFieldView.centerYAnchor).isActive = true
-        floatingLabel.pinSides(to: textFieldView, padding: padding)
+        floatingLabel.centerYAnchor.constraint(equalTo: textField.centerYAnchor).isActive = true
 
-        textFieldView.bottomAnchor.constraint(equalTo: textField.bottomAnchor, constant: 20).isActive = true
-
+        // errorLabel
         errorLabel.translatesAutoresizingMaskIntoConstraints = false
-        dynamicErrorLabelTopConstraint = errorLabel.topAnchor.constraint(equalTo: textFieldView.bottomAnchor, constant: 0)
-        dynamicErrorLabelTopConstraint.isActive = true
-        errorLabel.pinSides(to: self)
-        errorLabel.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
+        errorLabel.widthAnchor.constraint(equalTo: widthAnchor).isActive = true
+
+        // Container stack view
+        expandingVstack.translatesAutoresizingMaskIntoConstraints = false
+        expandingVstack.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
+        expandingVstack.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
+
+        translatesAutoresizingMaskIntoConstraints = false
+        widthAnchor.constraint(equalTo: expandingVstack.widthAnchor).isActive = true
+        heightAnchor.constraint(equalTo: expandingVstack.heightAnchor).isActive = true
 
         // Add rightView if rightView is not nil
         guard let iconBtnConf = viewModel.type.iconButton else { return }
@@ -386,13 +407,8 @@ class AuthTextField: UIView, CustomTextField {
             }
         }
 
-        addSubview(iconBtn)
-        iconBtn.translatesAutoresizingMaskIntoConstraints = false
-        iconBtn.rightAnchor.constraint(equalTo: rightAnchor, constant: -15).isActive = true
-        iconBtn.centerYAnchor.constraint(equalTo: textFieldView.centerYAnchor).isActive = true
-        txtFieldRightAnchorConstraint.constant = -(30 + iconBtn.intrinsicContentSize.width)
+        hStack.addArrangedSubview(iconBtn)
         layoutIfNeeded()
-
     }
 }
 

@@ -82,7 +82,7 @@ private extension AddNameVC {
         subLabel.rightAnchor.constraint(equalTo: contentView.rightAnchor).isActive = true
 
         hStack.translatesAutoresizingMaskIntoConstraints = false
-        hStack.topAnchor.constraint(equalTo: subLabel.bottomAnchor, constant: 30).isActive = true
+        hStack.topAnchor.constraint(equalTo: subLabel.bottomAnchor, constant: 20).isActive = true
         hStack.leftAnchor.constraint(equalTo: contentView.leftAnchor).isActive = true
         hStack.rightAnchor.constraint(equalTo: contentView.rightAnchor).isActive = true
 
