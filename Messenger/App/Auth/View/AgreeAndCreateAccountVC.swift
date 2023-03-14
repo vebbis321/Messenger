@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Combine
 
 final class AgreeAndCreateAccountVC: DefaultCreateAccountVC {
 
@@ -18,6 +19,7 @@ final class AgreeAndCreateAccountVC: DefaultCreateAccountVC {
     let vStack = UIStackView(frame: .zero)
     let iAggreBtn = AuthButton(title: "I Agree")
 
+    private var stateSubscription: AnyCancellable?
 
     init(titleStr: String, password: String) {
         super.init(titleStr: titleStr)
@@ -32,6 +34,21 @@ final class AgreeAndCreateAccountVC: DefaultCreateAccountVC {
         hideKeyboardWhenTappedAround()
         setUpViews()
         setUpConstraints()
+
+        stateSubscription = viewModel.state
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] currentState in
+                switch currentState {
+                case .idle:
+                    break
+                case .loading:
+                    self?.iAggreBtn.isLoading = true
+                case .success:
+                    self?.iAggreBtn.isLoading = false
+                case .error(_):
+                    self?.iAggreBtn.isLoading = false
+                }
+            }
     }
 }
 
@@ -50,8 +67,13 @@ private extension AgreeAndCreateAccountVC {
         vStack.spacing = 20
 
         // iAggreBtn
-        iAggreBtn.addAction(for: .touchUpInside) { [weak self] _ in
-//            self?.coordinator?.goToAddEmailVC()
+        iAggreBtn.addAction(for: .touchUpInside) { _ in
+            Task { [weak self] in
+                guard let self = self,
+                      let password = self.coordinator?.password,
+                      let user = self.coordinator?.user else { return }
+                await self.viewModel.createAccout(userPrivate: user, password: password)
+            }
         }
 
         // content

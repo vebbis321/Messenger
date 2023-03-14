@@ -11,7 +11,7 @@ final class AddEmailVC: DefaultCreateAccountVC {
 
     let subLabel: UILabel = .createSubLabel(with: "Enter the address at which you can be contacted. No one will see this on your profile.")
     let emailTextField = AuthTextField(viewModel: .init(placeholder: "Email address", returnKey: .done, type: .Default(.Email)))
-    let nextButton: UIButton = AuthButton(title: "Next")
+    let nextButton = AuthButton(title: "Next")
 
 
     override func viewDidLoad() {
@@ -19,6 +19,7 @@ final class AddEmailVC: DefaultCreateAccountVC {
         hideKeyboardWhenTappedAround()
         setUpViews()
         setUpConstraints()
+
     }
 }
 

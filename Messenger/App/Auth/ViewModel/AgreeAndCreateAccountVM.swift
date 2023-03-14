@@ -6,9 +6,18 @@
 //
 
 import Foundation
+import Combine
 
 final class AgreeAndCreateAccountVM {
+    enum State {
+        case idle
+        case loading
+        case success
+        case error(MessengerError)
+    }
+
     var textItemVms: [AgreeAndCreateAccountItemVM]!
+    var state = CurrentValueSubject<State, Never>(.idle)
 
     private var authService: AuthServiceProtocol
     private var firestoreService: FirestoreServiceProtocol
@@ -22,6 +31,7 @@ final class AgreeAndCreateAccountVM {
 
     @MainActor
     func createAccout(userPrivate: UserPrivate, password: String) async {
+        state.send(.loading)
         do {
             let uid = try await authService.createAccounWith(email: userPrivate.email, password: password)
 
@@ -33,9 +43,9 @@ final class AgreeAndCreateAccountVM {
             )
 
             try await firestoreService.createDoc(model: user, path: .userPrivate(uid: uid))
-
+            state.send(.success)
         } catch {
-
+            state.send(.error(.default(error)))
         }
     }
 }

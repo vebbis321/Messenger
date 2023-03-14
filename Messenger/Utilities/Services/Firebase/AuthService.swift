@@ -14,10 +14,9 @@ protocol AuthServiceProtocol {
     func observeAuthChanges() -> AnyPublisher<SessionState, Never>
 }
 
-enum SessionState {
+enum SessionState: Equatable {
     case idle
-    case notAuth
-    case notVerified
+    case notAuth(showVerifyVC: Bool)
     case verified
     case error
 }

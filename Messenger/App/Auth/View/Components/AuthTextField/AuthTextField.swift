@@ -78,7 +78,7 @@ class AuthTextField: UIView, CustomTextField {
     private lazy var hStack: UIStackView = {
         let stack = UIStackView(frame: .zero)
         stack.alignment = .leading
-        stack.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        stack.autoresizingMask = [.flexibleWidth]
         stack.axis = .horizontal
         stack.spacing = 10
         stack.isLayoutMarginsRelativeArrangement = true
@@ -200,7 +200,7 @@ class AuthTextField: UIView, CustomTextField {
             guard let self = self else { return }
             self.errorLabel.isHidden = false
             self.errorLabel.alpha = 1
-            self.layoutIfNeeded()
+            self.errorLabel.layoutIfNeeded()
         }
 
     }
@@ -210,7 +210,7 @@ class AuthTextField: UIView, CustomTextField {
             guard let self = self else { return }
             self.errorLabel.alpha = 0
             self.errorLabel.isHidden = true
-            self.layoutIfNeeded()
+            self.errorLabel.layoutIfNeeded()
         }
     }
 
@@ -252,7 +252,7 @@ class AuthTextField: UIView, CustomTextField {
             switch textState {
             case .isEmpty:
                 if errorState != nil {
-                    rightViewButton.updateIcon(newIcon: "exclamationmark.circle", newColor: .red, newSize: 20)
+                    rightViewButton.updateIcon(newIcon: "exclamationmark.circle", newColor: .red, newSize: 17)
                     rightViewButton.isHidden = false
                 } else {
                     rightViewButton.isHidden = true

@@ -28,9 +28,9 @@ extension Publishers {
             self.subscriber = subscriber
             self.handler = Auth.auth().addStateDidChangeListener { auth, user in
                 if let user = user {
-                    _ = subscriber.receive(user.isEmailVerified ? .verified : .notVerified)
+                    _ = subscriber.receive(user.isEmailVerified ? .verified : .notAuth(showVerifyVC: true))
                 } else {
-                    _ = subscriber.receive(.notAuth)
+                    _ = subscriber.receive(.notAuth(showVerifyVC: false))
                 }
             }
         }

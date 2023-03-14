@@ -24,8 +24,8 @@ final class StateManager {
 
     func listen() {
         authSubscription = authService.observeAuthChanges()
-            .receive(on: DispatchQueue.main)
             .removeDuplicates()
+            .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
                 self?.session.send(state)
             }

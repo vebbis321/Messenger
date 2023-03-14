@@ -11,9 +11,17 @@ final class AuthButton: UIButton {
 
     var action: (()->())?
 
-    private lazy var activityIndicator = UIActivityIndicatorView(style: .medium)
+//    private lazy var activityIndicator: UIActivityIndicatorView = {
+//        let activity = UIActivityIndicatorView(style: .medium)
+//        activity.hidesWhenStopped = true
+//        activity.color = .theme.buttonText
+//        return activity
+//    }()
+
+    private lazy var spinner = SpinnerView(colors: [.white], lineWidth: 2)
 
     private var title: String
+
     init(frame: CGRect = .zero, title: String) {
         self.title = title
         super.init(frame: frame)
@@ -22,9 +30,30 @@ final class AuthButton: UIButton {
         setUpConstraints()
     }
 
+    var isLoading = false {
+        didSet {
+            updateView()
+        }
+    }
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+
+    func updateView() {
+        if isLoading {
+            spinner.isAnimating = true
+            titleLabel?.alpha = 0
+            imageView?.alpha = 0
+            // to prevent multiple click while in process
+            isEnabled = false
+        } else {
+            spinner.isAnimating = false
+            titleLabel?.alpha = 1
+            imageView?.alpha = 0
+            isEnabled = true
+        }
+      }
 
     
 }
@@ -49,10 +78,7 @@ private extension AuthButton {
         addTarget(self, action: #selector(btnTapped), for: .touchUpInside)
 
         // activityIndicator
-        activityIndicator.hidesWhenStopped = true
-        activityIndicator.color = .theme.buttonText
-
-        addSubview(activityIndicator)
+        addSubview(spinner)
     }
 }
 
@@ -67,8 +93,10 @@ private extension AuthButton {
         bottomAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 15).isActive = true
 
         // activityIndicator
-        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
-        activityIndicator.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
-        activityIndicator.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
+        spinner.translatesAutoresizingMaskIntoConstraints = false
+        spinner.heightAnchor.constraint(equalToConstant: titleLabel.intrinsicContentSize.height).isActive = true
+        spinner.widthAnchor.constraint(equalToConstant: titleLabel.intrinsicContentSize.height).isActive = true
+        spinner.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
+        spinner.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
     }
 }

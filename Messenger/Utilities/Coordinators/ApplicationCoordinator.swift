@@ -22,7 +22,6 @@ final class ApplicationCoordinator: Coordinator {
     }
 
     func start() {
-//        window.rootViewController = TextfieldVC()
         stateSubscription = stateManager.session
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
@@ -31,16 +30,19 @@ final class ApplicationCoordinator: Coordinator {
                     let vc = LaunchVC()
                     self?.window.rootViewController = vc
 
-                case .notAuth:
+                case .notAuth(let showVerifyVC):
+                    print("NOT auth, showVerify: \(showVerifyVC)")
+
                     let child = LogInCoordinator()
                     child.parentCoordinator = self
                     self?.childCoordinators.removeAll()
                     self?.childCoordinators.append(child)
                     child.start()
-                    self?.window.rootViewController = child.rootViewController
+                    
+                    if showVerifyVC {
+                        child.showVerifyEmail()
+                    }
 
-                case .notVerified:
-                    break
 
                 case .verified:
                     break

@@ -34,6 +34,12 @@ final class LogInCoordinator: NSObject, Coordinator {
         child.start()
     }
 
+    func showVerifyEmail() {
+        let vc = VerifyVC(titleStr: "Verify your email")
+        vc.modalPresentationStyle = .fullScreen
+        rootViewController.present(vc, animated: true)
+    }
+
     deinit {
         print("✅ Deinit LogInCoordinator")
     }
