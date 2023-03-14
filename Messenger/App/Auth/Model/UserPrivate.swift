@@ -8,7 +8,7 @@
 import Foundation
 import FirebaseFirestoreSwift
 
-struct UserPrivate: Identifiable, Codable {
+struct UserPrivate: FirestoreDocumentProtocol {
     @DocumentID var id: String? = UUID().uuidString
     var firstName: String
     var surname: String

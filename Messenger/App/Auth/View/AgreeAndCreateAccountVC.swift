@@ -9,11 +9,14 @@ import UIKit
 
 final class AgreeAndCreateAccountVC: DefaultCreateAccountVC {
 
-    let viewModel = AgreeAndCreateAccountVM()
+    let viewModel = AgreeAndCreateAccountVM(
+        authService: AuthService(),
+        firestoreService: FirestoreService()
+    )
     let subLabel = UILabel.createSubLabel(with: "Create a password with at least 6 letters and numbers. It should be something that others can't guess.")
     let tappableTextFields: [TappableTextView] = Array(0..<4).map { _ in .init() }
     let vStack = UIStackView(frame: .zero)
-    let nextButton = AuthButton(title: "I Agree")
+    let iAggreBtn = AuthButton(title: "I Agree")
 
 
     init(titleStr: String, password: String) {
@@ -46,15 +49,15 @@ private extension AgreeAndCreateAccountVC {
         vStack.axis = .vertical
         vStack.spacing = 20
 
-        // nextBtn
-        nextButton.addAction(for: .touchUpInside) { [weak self] _ in
+        // iAggreBtn
+        iAggreBtn.addAction(for: .touchUpInside) { [weak self] _ in
 //            self?.coordinator?.goToAddEmailVC()
         }
 
         // content
         contentView.addSubview(subLabel)
         contentView.addSubview(vStack)
-        contentView.addSubview(nextButton)
+        contentView.addSubview(iAggreBtn)
     }
 }
 
@@ -69,9 +72,9 @@ private extension AgreeAndCreateAccountVC {
         vStack.topAnchor.constraint(equalTo: subLabel.bottomAnchor, constant: 20).isActive = true
         vStack.pinSides(to: contentView)
 
-        nextButton.topAnchor.constraint(equalTo: vStack.bottomAnchor, constant: 20).isActive = true
-        nextButton.widthAnchor.constraint(equalTo: contentView.widthAnchor).isActive = true
-        nextButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor).isActive = true
+        iAggreBtn.topAnchor.constraint(equalTo: vStack.bottomAnchor, constant: 20).isActive = true
+        iAggreBtn.widthAnchor.constraint(equalTo: contentView.widthAnchor).isActive = true
+        iAggreBtn.bottomAnchor.constraint(equalTo: contentView.bottomAnchor).isActive = true
 
     }
 }

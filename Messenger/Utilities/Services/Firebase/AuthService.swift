@@ -10,7 +10,7 @@ import Combine
 import FirebaseAuth
 
 protocol AuthServiceProtocol {
-    func createAccounWith(email: String, password: String) async throws
+    func createAccounWith(email: String, password: String) async throws -> String
     func observeAuthChanges() -> AnyPublisher<SessionState, Never>
 }
 
@@ -23,16 +23,17 @@ enum SessionState {
 }
 
 // MARK: - Create account
-final class AuthService: AuthServiceProtocol {
-    func createAccounWith(email: String, password: String) async throws {
+final actor AuthService: AuthServiceProtocol {
+    func createAccounWith(email: String, password: String) async throws -> String {
         let result = try await Auth.auth().createUser(withEmail: email, password: password)
         try await result.user.sendEmailVerification()
+        return result.user.uid
     }
 }
 
 // MARK: - Observe
 extension AuthService {
-    func observeAuthChanges() -> AnyPublisher<SessionState, Never> {
+    nonisolated func observeAuthChanges() -> AnyPublisher<SessionState, Never> {
         return Publishers.AuthPublisher().eraseToAnyPublisher()
     }
 }

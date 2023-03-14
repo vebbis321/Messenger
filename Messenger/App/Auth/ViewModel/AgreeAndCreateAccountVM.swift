@@ -10,8 +10,33 @@ import Foundation
 final class AgreeAndCreateAccountVM {
     var textItemVms: [AgreeAndCreateAccountItemVM]!
 
-    init() {
+    private var authService: AuthServiceProtocol
+    private var firestoreService: FirestoreServiceProtocol
+
+    init(authService: AuthServiceProtocol, firestoreService: FirestoreServiceProtocol) {
+        self.authService = authService
+        self.firestoreService = firestoreService
+
         createTextItemVms()
+    }
+
+    @MainActor
+    func createAccout(userPrivate: UserPrivate, password: String) async {
+        do {
+            let uid = try await authService.createAccounWith(email: userPrivate.email, password: password)
+
+            let user = UserPrivate(
+                id: uid, firstName: userPrivate.firstName,
+                surname: userPrivate.surname,
+                email: userPrivate.email,
+                dateOfBirth: userPrivate.dateOfBirth
+            )
+
+            try await firestoreService.createDoc(model: user, path: .userPrivate(uid: uid))
+
+        } catch {
+
+        }
     }
 }
 
