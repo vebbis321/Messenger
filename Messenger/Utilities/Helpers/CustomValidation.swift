@@ -76,7 +76,7 @@ enum ValidationState: Equatable {
     case error(ErrorState)
     case valid
 
-    enum ErrorState: String {
+    enum ErrorState {
         case empty
         case invalidEmail
         case invalidPhoneNum
@@ -84,6 +84,7 @@ enum ValidationState: Equatable {
         case passwordNeedsNum
         case passwordNeedsLetters
         case nameCantHaveNumOrSpecialChars
+        case toShortName
 
         var description: String {
             switch self {
@@ -101,6 +102,8 @@ enum ValidationState: Equatable {
                 return "Your password doesn't contain any letters."
             case .nameCantHaveNumOrSpecialChars:
                 return "Name can't contain numbers or special characters."
+            case .toShortName:
+                return "Your name can't be less than two characters."
             }
         }
     }
@@ -190,7 +193,7 @@ struct NameValidator: CustomValidation {
         })
         .map { isEmpty, toShort, hasNumbers, hasSpecialChars in
             if isEmpty { return .error(.empty) }
-            if toShort { return .error(.toShortPassword) }
+            if toShort { return .error(.toShortName) }
             if hasNumbers || hasSpecialChars { return .error(.nameCantHaveNumOrSpecialChars) }
             return .valid
         }

@@ -27,6 +27,21 @@ final class AddPasswordVC: DefaultCreateAccountVC {
     }
 }
 
+// MARK: - Action
+private extension AddPasswordVC {
+    private func buttonAction() {
+        if passwordTextField.validationSubject.value == .valid {
+            // if valid on first press move to next vc
+            coordinator?.password = passwordTextField.textFieldSubject.value
+            coordinator?.goToAgreeAndCreateAccountVC()
+        } else {
+            passwordTextField.startValidation()
+        }
+
+    }
+}
+
+// MARK: - Views
 private extension AddPasswordVC {
     private func setUpViews() {
 
@@ -34,8 +49,7 @@ private extension AddPasswordVC {
         passwordTextField.delegate = self
 
         nextButton.addAction(for: .touchUpInside) { [weak self] _ in
-            
-            self?.coordinator?.goToAgreeAndCreateAccountVC()
+            self?.buttonAction()
         }
 
         contentView.addSubview(subLabel)

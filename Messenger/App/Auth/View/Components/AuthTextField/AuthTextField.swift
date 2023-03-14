@@ -117,12 +117,23 @@ class AuthTextField: UIView, CustomTextField {
     // MARK: - override
     override func didMoveToWindow() {
         // similar to viewWillAppear
-        textField.createBinding(
-            with: textFieldSubject,
-            storeIn: &subscriptions
-        )
-        guard viewModel.type == .Date else { return }
-        updateDate()
+        switch viewModel.type {
+        case .Date:
+            updateDate()
+        default:
+            guard let validatorType = viewModel.type.validatorType else { return }
+            guard validationSubject.value == .idle else { return }
+            textField.createBinding(
+                with: textFieldSubject,
+                storeIn: &subscriptions
+            )
+            textField.validateText(
+                validationType: validatorType,
+                subject: textFieldSubject
+            )
+            .assign(to: \.validationSubject.value, on: self)
+            .store(in: &subscriptions)
+        }
     }
 
     // MARK: - Private Properties
@@ -135,6 +146,7 @@ class AuthTextField: UIView, CustomTextField {
 
     // MARK: - Combine
     private var subscriptions = Set<AnyCancellable>()
+    private var validationSubscription: AnyCancellable? = nil
     public var textFieldSubject = CurrentValueSubject<String, Never>("")
     public var validationSubject = CurrentValueSubject<ValidationState, Never>(.idle)
 
@@ -164,18 +176,8 @@ class AuthTextField: UIView, CustomTextField {
 
     // MARK: - Public Methods
     public func startValidation() {
-
-        guard validationSubject.value == .idle else { return }
-        guard let validatorType = viewModel.type.validatorType else { return }
-
-        textField.validateText(
-            validationType: validatorType,
-            subject: textFieldSubject
-        )
-        .assign(to: \.validationSubject.value, on: self)
-        .store(in: &subscriptions)
-
-        validationSubject
+        guard validationSubscription == nil else { return }
+        validationSubscription = validationSubject
             .sink { [weak self] state in
                 switch state {
                 case .idle:
@@ -188,8 +190,7 @@ class AuthTextField: UIView, CustomTextField {
                     self?.hideErrorLabel()
                     self?.errorState = nil
                 }
-
-            }.store(in: &subscriptions)
+            }
     }
 
     // MARK: - Private Methods

@@ -22,18 +22,25 @@ final class AddEmailVC: DefaultCreateAccountVC {
     }
 }
 
+// MARK: - Action
 private extension AddEmailVC {
-    private func setUpViews() {
-
-        // emailTextField
-
-
-        nextButton.addAction(for: .touchUpInside) { [weak self] _ in
-            guard let self = self else { return }
-            self.coordinator?.user.email = self.emailTextField.textField.text!
-            self.coordinator?.goToAddPasswordVC()
+    private func buttonAction() {
+        if emailTextField.validationSubject.value == .valid {
+            // if valid on first press move to next vc
+            coordinator?.user.email = emailTextField.textFieldSubject.value
+            coordinator?.goToAddPasswordVC()
+        } else {
+            emailTextField.startValidation()
         }
 
+    }
+}
+
+private extension AddEmailVC {
+    private func setUpViews() {
+        nextButton.addAction(for: .touchUpInside) { [weak self] _ in
+            self?.buttonAction()
+        }
         contentView.addSubview(subLabel)
         contentView.addSubview(emailTextField)
         contentView.addSubview(nextButton)
