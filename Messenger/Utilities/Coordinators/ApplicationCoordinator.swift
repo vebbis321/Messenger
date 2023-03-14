@@ -22,6 +22,7 @@ final class ApplicationCoordinator: Coordinator {
     }
 
     func start() {
+//        window.rootViewController = TextfieldVC()
         stateSubscription = stateManager.session
             .receive(on: DispatchQueue.main)
             .sink { [weak self] state in
@@ -38,10 +39,7 @@ final class ApplicationCoordinator: Coordinator {
                     self?.childCoordinators.removeAll()
                     self?.childCoordinators.append(child)
                     child.start()
-                    
-                    if showVerifyVC {
-                        child.showVerifyEmail()
-                    }
+                    self?.window.rootViewController = child.rootViewController
 
 
                 case .verified:
